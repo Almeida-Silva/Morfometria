@@ -23,7 +23,7 @@ metadados <- read_xlsx("Dados_aula1.xlsx", sheet = 'Aula1', range = cell_cols("A
 dados <- read_xlsx("Dados_aula1.xlsx", sheet = 'Aula1', range = cell_cols("C:O"), col_types = 'numeric')
 ```
 
-## Estimar os NA
+**Estimar os NA**  
 Um problema comum na morfometria linear é a impossibilidade de tomar uma ou mais medidas de algum(ns) indivíduo(s). Existem algumas maneiras de lidar com esse tipo de questão, como remover a variável ou o espécime (quando isso não parecer impactar de maneira importante no conjunto de dados) ou buscar um método de inferência para indicar qual seria o valor esperado. Aqui aplicaremos essa segunda abordagem. Para isso, seguiremos a proposta de [Josse & Husson 2016](https://doi.org/10.18637/jss.v070.i01), um método que se baseia na análise de componentes principais. 
 
 ```{r missMDA, echo=FALSE, eval=FALSE}
@@ -37,14 +37,18 @@ dados <- round(res.impute$completeObs, 1)
 rownames(dados) <- metadados$spp
 ```
 
-## Log
-
-Transformar o conjunto de dados pelo logarítmo natural
+**Transformação por log**  
+Uma vez que o conjunto de dados esteja completo, é necessário transformá-lo de modo que os dados estejam em uma mesma escala. Para isso, aqui transformaremos os dados através de seu logaritmo. Entre outras vantagens dessa abordagem, ela reduz o efeito de valores extremos na amostra e normaliza sua distribuição. É válido comentar que a forma como é usada a função `log()` abaixo converte os dados originais para seu logaritmo natural (neperiano), dado que não indicamos um valor para a base. Consulte o help da função para mais detalhes.
 
 ```{r data_v2, echo=FALSE, eval=TRUE}
 # Transformar os dados com logaritmo natural
 dados <- log(dados)
+```
 
+**Modelo de regressão linear (RL)**  
+Dado que queremos remover o efeito do tamanho para analisar se continua existindo diferenciação entre as medidas morfológicas, vamos empregar aqui uma regressão linear múltipla. A ideia aqui se aproveita de uma propriedade estatística. Quando criamos um modelo para testar se uma variável *y* na natureza pode ser explicada por outra *x*, sabemos que essa relação não será perfeita: existe uma certa variação nos valores de *y* que está além do que *x* pode explicar. Esse distanciamento entre o que seria esperado em um modelo perfeito e o que de fato observamos nos dados recebe o nome de *resíduo*. Então se gerarmos um modelo em que testamos se todas as medidas são explicadas pelo tamanho, os resíduos desse modelo estarão minimamente livres do efeito do tamanho em si.  
+
+```{r dividir, echo=FALSE, eval=TRUE}
 # Definir variáveis de medidas e tamanho
 medidas <- as.matrix(dados[, 2:ncol(dados)])
 size <- dados[, 1]
@@ -54,10 +58,8 @@ regr <- gls(medidas ~ size)
 summary(regr)
 ```
 
-
-## PCA
-
-Gerar uma PCA
+**Análise de componentes principais (PCA)**  
+Uma PCA é uma análise que visa reduzir a dimensionalidade dos dados através da maximização da explicação da variância, o que é feito encontrando eixos que representam combinações lineares das variáveis originais e que são perpendiculares entre si. [Esse vídeo](youtu.be/FgakZw6K1QQ) pode ser bastante esclarecedor para quem quiser entender melhor como funciona essa análise
 
 ```{r pca, echo=FALSE}
 # PCA com os resíduos da regressão
@@ -78,7 +80,6 @@ ggplot(df.PCAres, aes(PC1, PC2)) +
   ylab("PC2") +
   theme_bw()
 ```
-
 
 ## MANOVA
 
