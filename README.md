@@ -1,7 +1,11 @@
 # Morfometria
-
 ***Tópicos em Evolução e Diversidade I: Morfometria Geométrica***  
 Disciplina do *PPG Evolução e Diversidade, UFABC*  
+
+Bem-vindos à página da discplina de Morfometria Geométrica. Aqui serão disponibilizados os materiais utilizados ao longo do quadrimestre, seguindo o cronograma abaixo:  
+[Aulas 1 e 2](morflinear.md): Conceitos e aplicações da morfometria linear
+
+
 
 **TPI:** 4-0-8  
 
