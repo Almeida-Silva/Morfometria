@@ -59,7 +59,7 @@ summary(regr)
 ```
 
 **Análise de componentes principais (PCA)**  
-Uma PCA é uma análise que visa reduzir a dimensionalidade dos dados através da maximização da explicação da variância, o que é feito encontrando eixos que representam combinações lineares das variáveis originais e que são perpendiculares entre si. [Esse vídeo](youtu.be/FgakZw6K1QQ) pode ser bastante esclarecedor para quem quiser entender melhor como funciona essa análise
+Uma PCA é uma análise que visa reduzir a dimensionalidade dos dados através da maximização da explicação da variância, o que é feito encontrando eixos que representam combinações lineares das variáveis originais e que são perpendiculares entre si. [Esse vídeo](https://youtu.be/FgakZw6K1QQ) pode ser bastante esclarecedor para quem quiser entender melhor como funciona essa análise
 
 ```{r pca, echo=FALSE}
 # PCA com os resíduos da regressão
