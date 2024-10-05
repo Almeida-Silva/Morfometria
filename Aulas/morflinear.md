@@ -80,6 +80,12 @@ ggplot(df.PCAres, aes(PC1, PC2)) +
   ylab("PC2") +
   theme_bw()
 ```
+<p align="center">
+<img src="residuos.png" alt="Fig1" width="750" height="600">
+</p>
+
+## Resíduos das medidas lineares pelo tamanho
+Uma abordagem bastante aceita envolve a remoção do efeito do tamanho através de uma propriedade estatística: os resíduos de um modelo. Vamos começar indicando nossa pasta de trabalho, carregando os pacotes e importando os dados diretamente de uma planilha do Excel. Se você abrir a planilha no computador, repare que as medidas lineares foram tomadas entre as colunas C e O, enquanto A e B são as colunas que designam a que espécie e gênero cada indivíduo pertence. 
 
 ## MANOVA
 
