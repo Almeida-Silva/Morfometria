@@ -85,7 +85,18 @@ ggplot(df.PCAres, aes(PC1, PC2)) +
 </p>
 
 ## Log-shape ratios
-Outra abordagem bastante robusta consiste na transformação dos dados pela sua média geométrica, uma metodologia conhecida como *log-shape ratios*.
+Outra abordagem bastante robusta consiste na transformação dos dados pela sua média geométrica, uma metodologia conhecida como *log-shape ratios*. Seu autor, James E. Mosimann, era parte importante em um dos grandes debates da segunda metade do século passado no estudo morfológico. Em conjunto com Stephen Jay Gould, o renomado paleontólogo e divulgador científico, defendiam que existia uma *covariância* entre forma e tamanho, a que chamavam alometria. Se existe uma *covariância*, então existe uma aproximação matemática capaz de *isolar os dois efeitos*. Coube a Mosimann demonstrar isso matematicamente. Ele partiu da correção de cada uma das medidas de um indivíduo pela média geométrica de todas as medidas daquele indivíduo:  
+
+$$
+G = \left( \prod_{i=1}^{n} X_i \right)^{\frac{1}{n}}
+$$
+
+Uma vez que a média geométrica é calculada através do produto de seus elementos, o efeito do tamanho atuante sobre cada uma das medidas isoladamente passa a ser "acumulado" segundo sempre uma mesma escala, um mesmo *fator*. A seguir, os dados são transformados por seu logaritmo. Dada a propriedade de que o `log` de uma divisão é igual ao logaritmo do numerador menos o logaritmo do denominador, o log desse *fator* é removido do conjunto de dados     
+
+$$
+\log\left(\frac{X_i}{G}\right) = \log(X_i) - \log(G)
+$$
+
 
 ## MANOVA
 
