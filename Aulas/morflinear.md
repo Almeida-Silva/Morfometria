@@ -14,6 +14,7 @@ library(readxl)
 library(missMDA)
 library(nlme)
 library(tidyverse)
+library(ggpubr)
 library(MASS)
 
 # Carregar os metadados
@@ -149,8 +150,44 @@ ggplot(df.PCAgeom, aes(PC1, PC2)) +
 <img src="geommean.png" alt="Fig2" width="750" height="600">
 </p>
 
+**Relação entre as variáveis e os componentes principais**  
+Ótimo, com a PCA temos um panorama visual a respeito de como o `espaço da forma` se comporta em nossa amostra. Podemos ir além. É possível utilizar `pca.geom$rotation` para inspecionar o quanto cada variável está associada a cada componente principal. Isso permite entender quais são as medidas lineares que estão mais positivamente ou negativamente relacionadas a um determinado grupo na PCA, de acordo com os valores dos eixos.
+
+```{r eigenvectors, echo=FALSE}
+#Loadings
+# Extrair as correlações das variáveis com os eixos principais
+load.geom <- pca.geom$rotation
+
+# Preparar os dados para o gráfico
+load.geom.df <- data.frame(variable = rownames(load.geom),
+                           corr1 = load.geom[, 1],
+                           corr2 = load.geom[, 2])
+
+# Plotar o gráfico de barras com ggplot
+PC1.load<-ggplot(load.geom.df, aes(x = variable, y = corr1)) +
+  geom_bar(stat = "identity", aes(fill = corr1 > 0), color = "black", show.legend = F) +
+  scale_fill_manual(values = c("white", "darkgray")) +
+  labs(y = "Variable Loading on PC1") +
+  theme_bw()
+PC1.load
+
+# Atualizar o vetor indicando se a correlação é positiva ou negativa
+PC2.load<-ggplot(load.geom.df, aes(x = variable, y = corr2)) +
+  geom_bar(stat = "identity", aes(fill = corr2 > 0), color = "black", show.legend = F) +
+  scale_fill_manual(values = c("white", "darkgray")) +
+  labs(y = "Variable Loading on PC2") +
+  theme_bw()
+PC2.load
+
+combined_plot <- ggarrange(PC1.load, PC2.load, ncol = 2, nrow = 1)
+combined_plot
+```
+<p align="center">
+<img src="eigenvectors.png" alt="Fig3" width="700" height="350">
+</p>
+
 ## 3. Os gêneros diferem mais do que seria esperado ao acaso?
-A realização de uma PCA permite uma série de análises posteriores, que vamos explorar ao longo das aulas. No entanto, para testar se as medidas diferem entre nossos grupos de interesse (os gêneros), precisamos rodar uma outra análise. Aqui, empregaremos uma análise multivariada da variância.
+A realização de uma PCA permite uma série de análises posteriores, que vamos explorar ao longo das aulas. No entanto, para testar se as medidas diferem entre nossos grupos de interesse (os gêneros), precisamos rodar uma outra análise. Aqui, empregaremos uma análise multivariada da variância. Poderíamos realizar esse mesmo procedimento nas duas abordagens anteriores (análise dos resíduos e log-shape ratios), mas vamos nos ater à última para não ficarmos repetitivos.
 
 ```{r teste, echo=FALSE}
 # Teste MANOVA
