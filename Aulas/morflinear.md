@@ -2,7 +2,7 @@
 Começamos as aulas [1](Aula%201.pdf) e [2](Aula%202.pdf) tratando de morfometria linear. A ideia aqui é contextualizar seu uso ao longo do tempo e discutir sobre as abordagens estatísticas mais adequadas para esse tipo de dado. Já a atividade prática envolveu o uso do programa [ImageJ](https://imagej.net/software/fiji/downloads) para a obtenção de medidas lineares a partir de [fotos de girinos disponíveis na literatura](Fotos_Aula1.zip). Acontece que a família Hylodidae, aqui usada como exemplo, possui dois gêneros (_Megaelosia_ e _Phantasmarana_) cujas larvas podem chegar a ± 12cm, e outros dois (_Crossodactylus_ e _Hylodes_) que apresentam girinos de ± 4cm. Será que as medidas lineares são suficientes pra sugerir que esses bichos diferem entre si, ou será que toda a diferença encontrada reside na discrepância do tamanho?
 Para testar isso, usaremos os dados obtidos pelos alunos e salvos na planilha "[Dados_aula1.xlsx](Dados_aula1.xlsx)". 
 
-## Resíduos das medidas lineares pelo tamanho
+## 1. Resíduos das medidas lineares pelo tamanho
 Uma abordagem bastante aceita envolve a remoção do efeito do tamanho através de uma propriedade estatística: os resíduos de um modelo. Vamos começar indicando nossa pasta de trabalho, carregando os pacotes e importando os dados diretamente de uma planilha do Excel. Se você abrir a planilha no computador, repare que as medidas lineares foram tomadas entre as colunas C e O, enquanto A e B são as colunas que designam a que espécie e gênero cada indivíduo pertence. 
 
 ```{r data}
@@ -84,7 +84,7 @@ ggplot(df.PCAres, aes(PC1, PC2)) +
 <img src="residuos.png" alt="Fig1" width="750" height="600">
 </p>
 
-## Log-shape ratios
+## 2. Log-shape ratios
 Outra abordagem bastante robusta consiste na transformação dos dados pela sua média geométrica, uma metodologia conhecida como *log-shape ratios*. Seu autor, James E. Mosimann, era parte importante em um dos grandes debates da segunda metade do século passado no estudo morfológico. Em conjunto com Stephen Jay Gould, o renomado paleontólogo e divulgador científico, defendiam que existia uma *covariância* entre forma e tamanho, a que chamavam alometria. Se existe uma *covariância*, então existe uma aproximação matemática capaz de *isolar os dois efeitos*. Coube a Mosimann demonstrar isso matematicamente. Ele partiu da correção de cada uma das medidas de um indivíduo pela média geométrica de todas as medidas daquele indivíduo:  
 
 $$
@@ -96,6 +96,55 @@ Uma vez que a média geométrica é calculada através do produto de seus elemen
 $$
 \log\left(\frac{X_i}{G}\right) = \log(X_i) - \log(G)
 $$
+
+Na prática, é mais simples do que parece. Primeiro amos ler o conjunto de dados novamente, sem a coluna `C` que se refere ao tamanho dos girinos. Como esse conjunto de dados tem alguns `NA`, vamos novamente imputar os os valores faltantes.
+
+```{r medidas2, echo=FALSE}
+medidas2<-read_xlsx("Dados_aula1.xlsx", sheet='Aula1', 
+                 range = cell_cols("D:O"), 
+                 col_types = 'numeric') #análise SEM o tamanho
+#Resolvendo os missing: estimar
+nb<-estim_ncpPCA(medidas2, ncp.min = 0, ncp.max = 5, 
+                 method.cv = "Kfold", nbsim = 1000)
+
+res.impute <- imputePCA(medidas2, ncp = nb$ncp)
+medidas2<-round(res.impute$completeObs,1)
+rownames(medidas2)<-metadados$spp
+```
+
+Agora sim, vamos corregir os dados pela média geométrica. Repare que estamos usando a função `apply` para *aplicar* a função `prod` à todo o conjunto de dados `medidas2`. Ela calcula o produto de todos os elementos de um vetor. O argumento `1` ainda na função `apply` é usado para indicar que `prod` deve ser utilizado por todos os elementos ao longo de uma linha, não de uma coluna. Como cada linha representa um espécime, então está sendo calculado o produto de todas as medidas de um único indivíduo. 
+
+```{r geomean, echo=FALSE}
+#Log-shape ratios
+geom.mean <- log(medidas2 / 
+                   apply(medidas2,1, prod)^
+                   (1/ncol(medidas2)))
+geom.mean<-as.matrix(geom.mean)
+```
+
+Em seguida, podemos rodar a PCA.
+
+```{r pca2, echo=FALSE}
+#Rodar uma PCA para visualizar a distribuição dos dados
+pca.geom<-prcomp(geom.mean)
+summary(pca.geom)
+
+#Gerar um gráfico
+df.PCAgeom<-data.frame(spp = metadados$spp, 
+                      gen = metadados$gen,
+                      PC1 = pca.geom$x[,1], 
+                      PC2 = pca.geom$x[,2], 
+                      PC3 = pca.geom$x[,3])
+
+ggplot(df.PCAgeom, aes(PC1, PC2)) +
+  geom_point(aes(fill = gen), color="black", 
+             size = 4.5, pch = 21, 
+             show.legend = T)+
+  xlab("PC1") +
+  ylab("PC2") +
+  theme_bw()
+```
+
 
 
 ## MANOVA
