@@ -145,11 +145,12 @@ ggplot(df.PCAgeom, aes(PC1, PC2)) +
   theme_bw()
 ```
 
+<p align="center">
+<img src="geommean.png" alt="Fig2" width="750" height="600">
+</p>
 
-
-## MANOVA
-
-Existe de fato diferência entre os gêneros?
+## 3. Os gêneros diferem mais do que seria esperado ao acaso?
+A realização de uma PCA permite uma série de análises posteriores, que vamos explorar ao longo das aulas. No entanto, para testar se as medidas diferem entre nossos grupos de interesse (os gêneros), precisamos rodar uma outra análise. Aqui, empregaremos uma análise multivariada da variância.
 
 ```{r teste, echo=FALSE}
 # Teste MANOVA
@@ -157,21 +158,54 @@ teste <- manova(medidas ~ df.PCAres$gen)
 summary(teste)
 ```
 
+No entanto, neste nosso caso as coisas são um pouco mais complicadas. A saída para `summary(teste)` foi:  
+```{r erro, echo=FALSE}
+Error en summary.manova(teste.geom): residuals have rank 11 < 12
+```  
 
-## Posthoc
+Isso pode ser consequência de duas coisas: ou colinearidade entre as variáveis dependentes (i.e., as medidas são fortemente correlacionadas entre si) ou existe certa insuficiência de dados (i.e., mais medidas tomadas do que a quantidade de indivíduos permite abordar). Apenas como uma dica a parte, vamos usar o pacote `GGally` para inspecionar visualmente a relação entre as variáveis.  
 
-Usando uma LDA para como se separam os grupos
+```{r corrplot, echo=FALSE}
+install.packages("GGally")
+library(GGally)
+ggpairs(as.data.frame(geom.mean))
+```  
+
+<p align="center">
+<img src="ggally.png" alt="Fig3" width="750" height="600">
+</p>
+
+Exceto pela relação entre largura da cauda `(LC)` e largura da musculatura caudal `(LMC)`, que é de 0,8, isso não parece ser um problema. Sendo assim, vamos seguir com o nosso modelo e usar uma das primeiras aplicações aplicações da PCA: a redução de dimensionalidade. Usaremos os valores obtidos após a PCA (`pca.geom$x`, que é uma transformação dos dados originais) para testar por MANOVA se os gêneros são diferentes.
+
+```{r testepca, echo=FALSE}
+#Fazendo a manova sobre os dados da PCA
+teste.geom <- manova(pca.geom$x ~ df.PCAgeom$gen)
+summary(teste.geom)
+```  
+<p align="center">
+<img src="tmanova.png" alt="Fig4" width="600" height="140">
+</p>
+
+
+## 4. Afinal, quem difere de quem?
+
+Bom, a MANOVA indica que sim, existe diferença na morfologia entre os gêneros. Mas entre quais deles? Como nossa amostra é composta por girinos de *Crossodactylus*, *Hylodes* e *Phantasmarana*, as diferenças captadas pela análise podem estar entre apenas dois deles. Para verificar quais gêneros são, de fato, distintos entre si utilizamos testes post-hoc. Quando estamos tratando de uma ANOVA, o mais comum seria utilizar um Teste de Tukey para esse fim. No entanto, abordagens similares para a MANOVA são um pouco mais complicadas.  
+
+Por isso, vamos adotar outra estratégia. Vamos testar se a nossa definição à priori de `gênero` é suficiente para enfatizar diferenças entre as medidas usando uma análise discriminante linear (LDA). Em resumo, a análise discriminante linear busca identificar padrões nas variáveis originais que permitam categorizar os dados em grupos, facilitando previsões informadas sobre novas observações. Em outras palavras: se eu encontrasse na natureza um girino de um desses três gêneros e tomasse as doze medidas lineares aqui usadas, eu seria capaz de inferir a qual gênero ele pertence?
 
 ```{r posthoc, echo=FALSE}
 # Análise discriminante linear
 lda.phc <- lda(df.PCAres$gen ~ medidas, CV = FALSE)
+```
 
+A partir de seus resultados, geramos um novo gráfico. Como a LDA é uma análise que busca enfatizar padrões de acordo com a variância dos dados, ela consequentemente acaba maximizando a separação entre grupos testados. Se o gráfico gerado demonstrar sobreposição entre quaisquer gêneros, eles não são diferentes entre si.
+
+```{r graflda, echo=FALSE}
 # Preparar os dados da LDA para o gráfico
 lda_df <- data.frame(
   gen = df.PCAres[, "gen"],
   lda = predict(lda.phc)$x
 )
-lda_df
 
 # Gráfico da LDA
 ggplot(lda_df) +
@@ -179,6 +213,7 @@ ggplot(lda_df) +
              color = "black", pch = 21, size = 4) +
   labs(x = "LD1", y = "LD2") +
   theme_bw()
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```  
+<p align="center">
+<img src="lda.png" alt="Fig4" width="750" height="600">
+</p>
