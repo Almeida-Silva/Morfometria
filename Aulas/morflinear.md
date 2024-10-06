@@ -1,6 +1,6 @@
 # Morfometria Linear 
 Começamos as aulas [1](Aula%201.pdf) e [2](Aula%202.pdf) tratando de morfometria linear. A ideia aqui é contextualizar seu uso ao longo do tempo e discutir sobre as abordagens estatísticas mais adequadas para esse tipo de dado. Já a atividade prática envolveu o uso do programa [ImageJ](https://imagej.net/software/fiji/downloads) para a obtenção de medidas lineares a partir de [fotos de girinos disponíveis na literatura](Fotos_Aula1.zip). Acontece que a família Hylodidae, aqui usada como exemplo, possui dois gêneros (_Megaelosia_ e _Phantasmarana_) cujas larvas podem chegar a ± 12cm, e outros dois (_Crossodactylus_ e _Hylodes_) que apresentam girinos de ± 4cm. Será que as medidas lineares são suficientes pra sugerir que esses bichos diferem entre si, ou será que toda a diferença encontrada reside na discrepância do tamanho?
-Para testar isso, usaremos os dados obtidos pelos alunos e salvos na planilha "[Dados_aula1.xlsx](Dados_aula1.xlsx)". 
+Para testar isso, usaremos os dados obtidos pelos alunos e salvos na planilha "[Dados_aula1.xlsx](Dados_aula1.xlsx)". Veja os pdfs [Aula 1](Aula%201.pdf) e [Aula 2](Aula%202.pdf) para mais detalhes sobre as medidas e a parte teórica como um todo.
 
 ## 1. Resíduos das medidas lineares pelo tamanho
 Uma abordagem bastante aceita envolve a remoção do efeito do tamanho através de uma propriedade estatística: os resíduos de um modelo. Vamos começar indicando nossa pasta de trabalho, carregando os pacotes e importando os dados diretamente de uma planilha do Excel. Se você abrir a planilha no computador, repare que as medidas lineares foram tomadas entre as colunas C e O, enquanto A e B são as colunas que designam a que espécie e gênero cada indivíduo pertence. 
@@ -212,7 +212,7 @@ ggpairs(as.data.frame(geom.mean))
 <img src="ggally.png" alt="Fig3" width="750" height="600">
 </p>
 
-Exceto pela relação entre largura da cauda `(LC)` e largura da musculatura caudal `(LMC)`, que é de 0,8, isso não parece ser um problema. Sendo assim, vamos seguir com o nosso modelo e usar uma das primeiras aplicações aplicações da PCA: a redução de dimensionalidade. Usaremos os valores obtidos após a PCA (`pca.geom$x`, que é uma transformação dos dados originais) para testar por MANOVA se os gêneros são diferentes.
+Exceto pela relação entre largura da cauda `(LC)` e largura da musculatura caudal `(LMC)`, que é de `0,8`, isso não parece ser um problema. Sendo assim, vamos seguir com o nosso modelo e usar uma das primeiras aplicações aplicações da PCA: a redução de dimensionalidade. Usaremos os valores obtidos após a PCA (`pca.geom$x`, que é uma transformação dos dados originais) para testar por MANOVA se os gêneros são diferentes.
 
 ```{r testepca, echo=FALSE}
 #Fazendo a manova sobre os dados da PCA
@@ -254,3 +254,5 @@ ggplot(lda_df) +
 <p align="center">
 <img src="lda.png" alt="Fig4" width="750" height="600">
 </p>
+
+Sendo assim, podemos considerar que os girinos dos três gêneros são morfologicamente diferentes.
