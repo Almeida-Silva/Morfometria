@@ -4,8 +4,29 @@ Disciplina do *PPG Evolução e Diversidade, UFABC*
 
 Bem-vindos à página da discplina de Morfometria Geométrica. Aqui serão disponibilizados os materiais utilizados ao longo do quadrimestre, seguindo o cronograma abaixo:  
   
-[Aulas 1 e 2](Aulas/morflinear.md): Conceitos e aplicações da morfometria linear
+[Aulas 1 e 2](Aulas/morflinear.md):  
+Conceitos e aplicações da morfometria linear  
 
+[Aulas 3 e 4](Aulas/):  
+De landmarks ao espaço tangente - a morfometria geométrica  
+
+[Aula 5](Aulas/):  
+A forma como contorno - semilandmarks e análise de Fourier  
+
+[Aula 6](Aulas/):  
+Aplicando a morfometria geométrica ao 3D  
+
+[Aula 7](Aulas/):  
+Filogenia - forma média, disparidade morfológica e como a forma evolui ao longo do tempo  
+
+[Aula 8](Aulas/):  
+Simetria, assimetria e conceitos avançados sobre alometria  
+
+[Aula 9](Aulas/):  
+Modularidade e integração morfológica  
+
+[Aula 10](Aulas/):  
+Seminários  
 
 
 **TPI:** 4-0-8  
