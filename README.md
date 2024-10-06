@@ -3,6 +3,7 @@
 Disciplina do *PPG Evolução e Diversidade, UFABC*  
 
 Bem-vindos à página da discplina de Morfometria Geométrica. Aqui serão disponibilizados os materiais utilizados ao longo do quadrimestre, seguindo o cronograma abaixo:  
+  
 [Aulas 1 e 2](Aulas/morflinear.md): Conceitos e aplicações da morfometria linear
 
 
