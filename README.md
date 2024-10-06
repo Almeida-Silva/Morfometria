@@ -14,7 +14,7 @@ Espaço tangente e deformações da forma: a morfometria geométrica
 Contornos: semilandmarks e análise de Fourier  
 
 [Aula 6](Aulas/)  
-Aplicações da morfometria geométrica em 3D: retrodeformação  
+Aplicações da morfometria geométrica em 3D: retrodeformação e outras coisas  
 
 [Aula 7](Aulas/)  
 Filogenia: forma média, disparidade morfológica e como a forma evolui ao longo do tempo  
