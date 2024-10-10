@@ -52,3 +52,17 @@ E compará-la com o resultado da GPA:
 plotAllSpecimens(gpa)
 ```
 Em ambas as figuras anteriores, os pontos em cinza representam os landmarks de todo o dataset, enquanto os pontos pretos indicam a forma média do dataset.
+
+## 2. Morfoespaço
+Aqui vamos gerar a representação gráfica do nosso espaço da forma (o que seria chamado de espaço tangente por David Kendall), que é basicamente uma `PCA` aplicada ao dataset de landmarks.  
+
+```{r pca}
+# Gerando uma PCA da forma, ou morfoespaço
+pca<-gm.prcomp(gpa$coords)
+
+# Agrupando os três primeiros eixos da PCA em um data.frame para gerar um gráfico
+df.pca<-as.data.frame(pca$x[,1:3])
+# E adicionando as colunas em metadados referentes ao gênero, espécie e grupo ecomorfológico
+df.pca<-cbind(df.pca,metadados[,c(2,3,5)]) #df final, com os PCs, nomes das spp e níveis de agrupamento
+```
+
