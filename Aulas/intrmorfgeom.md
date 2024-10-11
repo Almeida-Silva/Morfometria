@@ -45,12 +45,19 @@ A diferença entre um conjunto de dados que foi alinhado por GPA em relação a 
 ```{r original}
 plotAllSpecimens(land.dt)
 ```
+<p align="center">
+<img src="semgpa.png" alt="Fig1" width="400" height="400">
+</p>
 
 E compará-la com o resultado da GPA:
 
 ```{r coordprocrustes}
 plotAllSpecimens(gpa)
 ```
+<p align="center">
+<img src="comgpa.png" alt="Fig2" width="400" height="400">
+</p>
+
 Em ambas as figuras anteriores, os pontos em cinza representam os landmarks de todo o dataset, enquanto os pontos pretos indicam a forma média do dataset.
 
 ## 2. Morfoespaço
@@ -64,5 +71,64 @@ pca<-gm.prcomp(gpa$coords)
 df.pca<-as.data.frame(pca$x[,1:3])
 # E adicionando as colunas em metadados referentes ao gênero, espécie e grupo ecomorfológico
 df.pca<-cbind(df.pca,metadados[,c(2,3,5)]) #df final, com os PCs, nomes das spp e níveis de agrupamento
+
+# Gerando o plot
+ggplot(df.pca, aes(Comp1, Comp2)) +
+  geom_point(aes(fill = gen), size = 4.5, shape = 21) +  # 'fill' para preenchimento, 'color' para contorno preto
+  scale_fill_manual(values = c("Thoropa" = "#C2C5C1", 
+                               "Cycloramphus" = "orangered")) +  # Definir cores de preenchimento
+  xlab("PC1") +
+  ylab("PC2") +
+  theme_bw()
+```
+<p align="center">
+<img src="morfoespaco.png" alt="Fig3" width="550" height="400">
+</p>
+
+A isso chamamos **morfoespaço**. Veja que cada ponto apresentado no gráfico da PCA representa um indivíduo em nossa amostra. Em outras palavras, cada ponto representa uma *forma*. A primeira informação que podemos extrair do morfoespaço é o percentual de explicação da variância explicado por cada eixo, o que pode ser acessado através de `Comp1` e `Comp2` no objeto PCA. Além disso, é possível estimar o quanto a forma varia ao longo dos eixos, distorção essa que é obtida através de grades de deformação geradas pela função `plotRefToTarget`. Elas são apresentadas abaixo:
+
+```{r relativewarpsPC1}
+# Ajustar o layout gráfico para 1 linha e 2 colunas
+par(mfrow = c(1, 2))
+par(mar = c(4, 4, 2, 1))  # Ajustar margens
+
+# Forma mínima do PC1
+plotRefToTarget(M1 = gpa$consensus, M2 = pca$shapes$shapes.comp1$min)
+mtext("Mín. do PC1", side = 3, line = 0.5, at = mean(par("usr")[1:2]), cex = 1.5)
+# Forma máxima do PC1
+plotRefToTarget(M1 = gpa$consensus, M2 = pca$shapes$shapes.comp1$max)
+mtext("Máx. do PC1", side = 3, line = 0.5, at = mean(par("usr")[1:2]), cex = 1.5)
+
+# Resetar layout gráfico ao padrão
+par(mfrow = c(1, 1), mar = c(5, 4, 4, 2) + 0.1)
+
+# Fechar o dispositivo gráfico para salvar o arquivo
+dev.off()
 ```
 
+Em relação ao `PC1`, a variação é:
+<p align="center">
+<img src="distorcaoPC1.png" alt="Fig2" width="650" height="250">
+</p>
+
+
+```{r relativewarpsPC2}
+# Ajustar o layout gráfico para 1 linha e 2 colunas
+par(mfrow = c(1, 2))
+par(mar = c(4, 4, 2, 1))  # Ajustar margens
+
+# Forma mínima do PC2
+plotRefToTarget(M1 = gpa$consensus, M2 = pca$shapes$shapes.comp2$min)
+mtext("Mín. do PC2", side = 3, line = 0.5, at = mean(par("usr")[1:2]), cex = 1.5)
+# Forma máxima do PC2
+plotRefToTarget(M1 = gpa$consensus, M2 = pca$shapes$shapes.comp2$max)
+mtext("Máx. do PC2", side = 3, line = 0.5, at = mean(par("usr")[1:2]), cex = 1.5)
+
+# Resetar layout gráfico ao padrão
+par(mfrow = c(1, 1), mar = c(5, 4, 4, 2) + 0.1)
+```
+
+(...) enquanto que a variação da forma no `PC2` foi de:
+<p align="center">
+<img src="distorcaoPC2.png" alt="Fig2" width="650" height="250">
+</p>
