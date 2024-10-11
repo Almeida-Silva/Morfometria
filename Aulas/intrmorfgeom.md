@@ -85,7 +85,7 @@ ggplot(df.pca, aes(Comp1, Comp2)) +
 <img src="morfoespaco.png" alt="Fig3" width="550" height="400">
 </p>
 
-A isso chamamos **morfoespaço**. Veja que cada ponto apresentado no gráfico da PCA representa um indivíduo em nossa amostra. Em outras palavras, cada ponto representa uma *forma*. A primeira informação que podemos extrair do morfoespaço é o percentual de explicação da variância explicado por cada eixo, o que pode ser acessado através de `Comp1` e `Comp2` no objeto PCA. Além disso, é possível estimar o quanto a forma varia ao longo dos eixos, distorção essa que é obtida através de grades de deformação geradas pela função `plotRefToTarget`. Elas são apresentadas abaixo:
+A isso chamamos **morfoespaço**. Veja que cada ponto apresentado no gráfico da PCA representa um indivíduo em nossa amostra. Em outras palavras, cada ponto representa uma *forma*. A primeira informação que podemos extrair do morfoespaço é o percentual de explicação da variância explicado por cada eixo, o que pode ser acessado através dos componentes do objeto PCA (os três primeiros, por exemplo, podem ser acessados via `pca$x[,1:3]`). Além disso, é possível estimar o quanto a forma varia ao longo dos eixos, distorção essa que é obtida através de grades de deformação geradas pela função `plotRefToTarget`. Elas são apresentadas abaixo:
 
 ```{r relativewarpsPC1}
 # Ajustar o layout gráfico para 1 linha e 2 colunas
@@ -108,7 +108,7 @@ dev.off()
 
 Em relação ao `PC1`, a variação é:
 <p align="center">
-<img src="distorcaoPC1.png" alt="Fig2" width="650" height="250">
+<img src="distorcaoPC1.png" alt="Fig4" width="650" height="250">
 </p>
 
 
@@ -130,5 +130,20 @@ par(mfrow = c(1, 1), mar = c(5, 4, 4, 2) + 0.1)
 
 (...) enquanto que a variação da forma no `PC2` foi de:
 <p align="center">
-<img src="distorcaoPC2.png" alt="Fig2" width="650" height="250">
+<img src="distorcaoPC2.png" alt="Fig5" width="650" height="250">
 </p>
+
+## 3. Alometria
+Essa distorção da forma pode ser influenciada por diversos fatores: tamanho, assimetria, ecomorfologia, dieta, ontogenia, etc. Nesta aula, vamos explorar os dois primeiros deles, começando pelo tamanho. Imagine uma amostra hipotética em que indivíduos menores têm a cabeça *arredondada*, enquanto indivíduos maiores apresentam a cabeça em formato *triangular*. Talvez a maioria dos casos reais não sejam assim tão óbvios, mas o tamanho comumente influencia na forma de estruturas biológicas, muitas vezes por limitar seu desenvolvimento. E já que agora sabemos que *tamanho* e *forma* são variáveis distintas e bem definidas após uma GPA, podemos testar como funciona a relação entre elas. Para isso, vamos usar a função `procD.lm` para realizar uma regressão linear de Procrustes.   
+
+```{r procDlm}
+# Testando a alometria
+m<-procD.lm(coords ~ log(Csize)*df.pca$gen, 
+                   data = gpa, iter = 9999) 
+summary(m)
+```
+<p align="center">
+<img src="alomtab.png" alt="Fig6" width="650" height="250">
+</p>
+
+Veja que `log(Csize)` tem `Valor p > 0,05`, de modo que o efeito do tamanho sobre a forma não é diferente do que seria esperado ao acaso.
