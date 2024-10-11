@@ -171,11 +171,18 @@ alom.rscr<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
               method = "RegScore",
               pch=20, cex=3, col=cores)
 ```
+<p align="center">
+<img src="RegScore.png" alt="Fig8" width="650" height="250">
+</p>
 
-Veja que os dados são apresentados com certa dispersão, o que torna mais difícil a visualização de padrões ou tendências. Por esse motivo, [Adams e Nistri (2010)](https://bmcecolevol.biomedcentral.com/articles/10.1186/1471-2148-10-216) propuseram uma linearização alométrica baseada em uma complexa reprojeção de matrizes. Apesar de matematicamente mais complicado, o método permite observar tendências de maneira bastante direta.
+
+Veja que os dados são apresentados com certa dispersão, o que torna mais difícil a visualização de padrões ou tendências. Por esse motivo, [Adams e Nistri (2010)](https://bmcecolevol.biomedcentral.com/articles/10.1186/1471-2148-10-216) propuseram uma linearização alométrica baseada em uma complexa reprojeção de matrizes, o `PredLine`. Apesar de matematicamente mais complicado, o método permite observar tendências de maneira bastante direta.
 
 ```{r predline}
 alom.pdln<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
               method = "PredLine",
               pch=20, cex=3, col=cores)
 ```
+<p align="center">
+<img src="PredLine.png" alt="Fig9" width="650" height="250">
+</p>
