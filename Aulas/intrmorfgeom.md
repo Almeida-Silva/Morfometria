@@ -172,7 +172,7 @@ alom.rscr<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
               pch=20, cex=3, col=cores)
 ```
 <p align="center">
-<img src="RegScore.png" alt="Fig8" width="650" height="250">
+<img src="RegScore.png" alt="Fig8" width="425" height="418">
 </p>
 
 
@@ -184,5 +184,5 @@ alom.pdln<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
               pch=20, cex=3, col=cores)
 ```
 <p align="center">
-<img src="PredLine.png" alt="Fig9" width="650" height="250">
+<img src="PredLine.png" alt="Fig9" width="425" height="418">
 </p>
