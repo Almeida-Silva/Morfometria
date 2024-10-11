@@ -143,7 +143,7 @@ m1<-procD.lm(coords ~ log(Csize),
 summary(m1)
 ```
 <p align="center">
-<img src="alomtab.png" alt="Fig6" width="650" height="250">
+<img src="alomtab1.png" alt="Fig6" width="650" height="250">
 </p>
 
 Veja que `log(Csize)` tem `Valor p > 0,05`, de modo que o efeito do tamanho sobre a forma não é diferente do que seria esperado ao acaso. É sempre válido analisar como seu nível de agrupamento de interesse pode mascarar esse efeito. Se sua amostra for composta por espécies diferentes, por exemplo, talvez algumas delas apresentem distorção alométrica, enquanto outras não. Para verificar isso, as variáveis preditoras do modelo devem ser testadas como produto entre `log(Csize)` e o seu `nível de agrupamento` de interesse. Na nossa amostra, vamos testar se os dois *gêneros* apresentam diferenças alométricas. 
@@ -155,7 +155,27 @@ m2<-procD.lm(coords ~ log(Csize)*df.pca$gen,
 summary(m2)
 ```
 <p align="center">
-<img src="alomtab2.png" alt="Fig6" width="650" height="250">
+<img src="alomtab2.png" alt="Fig7" width="650" height="250">
 </p>
 
-Vemos que, novamente, a alometria não foi constatada nos dados. Apenas para explorarmos melhor nosso conjunto de dados, vamos gerar alguns plots que permitem interpretar a relação entre *tamanho* e *forma* na nossa amostra. Isso não se faz necessário nesse caso específico (já que a alometria não foi significativa), mas quero apresentar as ferramentas que temos para entender melhor esse efeito.
+Vemos que, novamente, a alometria não foi constatada nos dados. Apenas para explorarmos melhor nosso conjunto de dados, vamos gerar alguns plots que permitem interpretar a relação entre *tamanho* e *forma* na nossa amostra. Isso não se faz necessário nesse caso específico (já que a alometria não foi significativa), mas quero apresentar as ferramentas visuais que temos para entender melhor esse efeito. 
+
+Primeiramente, vamos aos plots. Usaremos a função `plotAllometry()` para gerar gráficos alométricos, com cores distintas para cada um dos gêneros. A função aceita uma série de métodos para relacionar as nossas variáveis de interesse, mas os dois mais comumente empregados são o `RegScore` e o `PredLine`. O primeiro, `RegScore`, representa uma regressão entre a projeção da forma no PC1 do morfoespaço e a variável de tamanho considerada ([Drake & Klingenberg, 2007](https://royalsocietypublishing.org/doi/10.1098/rspb.2007.1169)).
+
+```{r regscore}
+# Testando a alometria, levando os gêneros em consideração
+cores <- ifelse(df.pca$gen == "Thoropa", "#C2C5C1",
+                ifelse(df.pca$gen  == "Cycloramphus", "orangered", NA))
+
+alom.rscr<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
+              method = "RegScore",
+              pch=20, cex=3, col=cores)
+```
+
+Veja que os dados são apresentados com certa dispersão, o que torna mais difícil a visualização de padrões ou tendências. Por esse motivo, [Adams e Nistri (2010)](https://bmcecolevol.biomedcentral.com/articles/10.1186/1471-2148-10-216) propuseram uma linearização alométrica baseada em uma complexa reprojeção de matrizes. Apesar de matematicamente mais complicado, o método permite observar tendências de maneira bastante direta.
+
+```{r predline}
+alom.pdln<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
+              method = "PredLine",
+              pch=20, cex=3, col=cores)
+```
