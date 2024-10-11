@@ -134,16 +134,28 @@ par(mfrow = c(1, 1), mar = c(5, 4, 4, 2) + 0.1)
 </p>
 
 ## 3. Alometria
-Essa distorção da forma pode ser influenciada por diversos fatores: tamanho, assimetria, ecomorfologia, dieta, ontogenia, etc. Nesta aula, vamos explorar os dois primeiros deles, começando pelo tamanho. Imagine uma amostra hipotética em que indivíduos menores têm a cabeça *arredondada*, enquanto indivíduos maiores apresentam a cabeça em formato *triangular*. Talvez a maioria dos casos reais não sejam assim tão óbvios, mas o tamanho comumente influencia na forma de estruturas biológicas, muitas vezes por limitar seu desenvolvimento. E já que agora sabemos que *tamanho* e *forma* são variáveis distintas e bem definidas após uma GPA, podemos testar como funciona a relação entre elas. Para isso, vamos usar a função `procD.lm` para realizar uma regressão linear de Procrustes.   
+Essa distorção da forma pode ser influenciada por diversos fatores: tamanho, assimetria, ecomorfologia, dieta, ontogenia, etc. Nesta aula, vamos explorar os dois primeiros deles, começando pelo tamanho. Imagine uma amostra hipotética em que indivíduos menores têm a cabeça *arredondada*, enquanto indivíduos maiores apresentam a cabeça em formato *triangular*. Talvez a maioria dos casos reais não sejam assim tão óbvios, mas o tamanho comumente influencia na forma de estruturas biológicas, muitas vezes por limitar seu desenvolvimento. E já que agora sabemos que *tamanho* e *forma* são variáveis distintas e bem definidas após uma GPA, podemos testar como funciona a relação entre elas. Esse efeito é chamado **alometria**. Para isso, vamos usar a função `procD.lm` para realizar uma regressão linear de Procrustes.   
 
 ```{r procDlm}
 # Testando a alometria
-m<-procD.lm(coords ~ log(Csize)*df.pca$gen, 
+m1<-procD.lm(coords ~ log(Csize), 
                    data = gpa, iter = 9999) 
-summary(m)
+summary(m1)
 ```
 <p align="center">
 <img src="alomtab.png" alt="Fig6" width="650" height="250">
 </p>
 
-Veja que `log(Csize)` tem `Valor p > 0,05`, de modo que o efeito do tamanho sobre a forma não é diferente do que seria esperado ao acaso.
+Veja que `log(Csize)` tem `Valor p > 0,05`, de modo que o efeito do tamanho sobre a forma não é diferente do que seria esperado ao acaso. É sempre válido analisar como seu nível de agrupamento de interesse pode mascarar esse efeito. Se sua amostra for composta por espécies diferentes, por exemplo, talvez algumas delas apresentem distorção alométrica, enquanto outras não. Para verificar isso, as variáveis preditoras do modelo devem ser testadas como produto entre `log(Csize)` e o seu `nível de agrupamento` de interesse. Na nossa amostra, vamos testar se os dois *gêneros* apresentam diferenças alométricas. 
+
+```{r procDlmgr}
+# Testando a alometria, levando os gêneros em consideração
+m2<-procD.lm(coords ~ log(Csize)*df.pca$gen, 
+                   data = gpa, iter = 9999) 
+summary(m2)
+```
+<p align="center">
+<img src="alomtab2.png" alt="Fig6" width="650" height="250">
+</p>
+
+Vemos que, novamente, a alometria não foi constatada nos dados. Apenas para explorarmos melhor nosso conjunto de dados, vamos gerar alguns plots que permitem interpretar a relação entre *tamanho* e *forma* na nossa amostra. Isso não se faz necessário nesse caso específico (já que a alometria não foi significativa), mas quero apresentar as ferramentas que temos para entender melhor esse efeito.
