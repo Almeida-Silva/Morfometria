@@ -172,7 +172,7 @@ alom.rscr<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
               pch=20, cex=3, col=cores)
 ```
 <p align="center">
-<img src="RegScore.png" alt="Fig8" width="425" height="418">
+<img src="RegScore.png" alt="Fig8" width="425" height="450">
 </p>
 
 
@@ -184,5 +184,7 @@ alom.pdln<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
               pch=20, cex=3, col=cores)
 ```
 <p align="center">
-<img src="PredLine.png" alt="Fig9" width="425" height="418">
+<img src="PredLine.png" alt="Fig9" width="425" height="450">
 </p>
+
+Veja que a forma (`eixo y`) no gráfico de `method = "PredLine"` sugere que a forma não varia em função do tamanho. Podemos dizer que a relação entre `forma` e `tamanho`
