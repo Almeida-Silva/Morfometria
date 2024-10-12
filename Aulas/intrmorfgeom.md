@@ -187,4 +187,20 @@ alom.pdln<-plotAllometry(m2, size = gpa$Csize, logsz = TRUE,
 <img src="PredLine.png" alt="Fig9" width="425" height="450">
 </p>
 
-Veja que a forma (`eixo y`) no gráfico de `method = "PredLine"` sugere que a forma não varia em função do tamanho. Podemos dizer que a relação entre `forma` e `tamanho`
+Repare que `PC1 for fitted values` (ou o `eixo y` no gráfico do `plotAllometry()` quando `method = "PredLine"`) é uma medida da variabilidade de formas encontradas na nossa amostra. Repare ainda que no nosso caso as duas retas se encontram basicamente alinhadas ao `eixo x`; em outras palavras a forma em *Cycloramphus* e *Thoropa* muda muito pouco sua forma em relação ao incremento do tamanho. Isso está de acordo com a ausência de efeito alométrico constatada pelo p-valor de `procD.lm()`, e podemos dizer que a relação entre `forma` e `tamanho` é **isométrica**. De qualquer forma, podemos a função `shape.predictor()` para inspecionar como essa relação está representada no nosso caso. 
+
+```{r shapepredictor}
+#Definindo a forma esperada com o mínimo e o máximo de tamanho na amostra
+preds <- shape.predictor(gpa$coords, x= log(gpa$Csize),
+                         Intercept = TRUE, 
+                         predmin = min(log(gpa$Csize)), 
+                         predmax = max(log(gpa$Csize))) 
+
+plotRefToTarget(M1 = preds$predmin, M2 = preds$predmax, mag=2.2,
+                method = "vector", useRefPts = F)
+```
+<p align="center">
+<img src="distorcaoSize.png" alt="Fig10" width="381" height="316">
+</p>
+
+A `shape.predictor()` é uma função bastante útil, e pode ser utilizada em outras situações. Aqui a ideia é que os pontos cinza representam os landmarks da forma referente ao tamanho mínimo (ou seja, a forma esperada por `predmin = min(log(gpa$Csize))`), enquanto o final das setas indica a forma esperada com o tamanho máximo (i.e., a forma quando `predmax = max(log(gpa$Csize))`). O argumento `method = "vector"` serve justamente para gerar essas setas, e poderia ser substituído por `method = "TPS"` se você preferir a grade de deformação, por exemplo.
