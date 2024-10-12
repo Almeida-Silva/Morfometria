@@ -204,3 +204,38 @@ plotRefToTarget(M1 = preds$predmin, M2 = preds$predmax, mag=2.2,
 </p>
 
 A `shape.predictor()` é uma função bastante útil, e pode ser utilizada em outras situações. Aqui a ideia é que os pontos cinza representam os landmarks da forma referente ao tamanho mínimo (ou seja, a forma esperada por `predmin = min(log(gpa$Csize))`), enquanto o final das setas indica a forma esperada com o tamanho máximo (i.e., a forma quando `predmax = max(log(gpa$Csize))`). O argumento `method = "vector"` serve justamente para gerar essas setas, e poderia ser substituído por `method = "TPS"` se você preferir a grade de deformação, por exemplo.
+
+## 4. Assimetria
+Por fim, testamos na aula um último efeito: a **assimetria**. Por distintas razões, pode haver uma tendência à uma desigualdade morfológica em lados opostos de um eixo de simetria. No nosso exemplo, é como se o lado direito e o lado esquerdo da cabeça dos *Cycloramphidae* fossem diferentes. Para testar assimetria, precisamos indicar quais são os pares de landmarks que seriam considerados simétricos entre si. Melhor visualizar os landmarks em ordem antes de fazer isso:  
+
+```{r ordemlandmarks} 
+# Plotando todos os landmarks
+plotAllSpecimens(gpa$coords)
+# Adicionar os números dos landmarks em vermelho
+text(gpa$coords[, , 1], labels = 1:nrow(gpa$coords), 
+     col = "red", cex = 0.8) # Ajuste `cex` conforme necessário
+```
+<p align="center">
+<img src="ordemland.png" alt="Fig11" width="400" height="400">
+</p>
+
+Agora sabemos que o único landmark não-pareado é o **11**. Então definimos os pares em um novo objeto, que será repassado à função `bilat.symmetry()`. No nosso caso, queremos testar a assimetria dentro de uma única configuração de landmarks, por isso devemos indicar `object.sym = TRUE`.  
+
+```{r bilatsymm} 
+# Definindo os pares
+pares <- matrix(data = c(1,2,
+                         3,4,
+                         5,6,
+                         7,8,
+                         9,10),
+                  ncol = 2, byrow = TRUE)
+
+# Realizando o teste
+bilat <- bilat.symmetry(gpa, object.sym = TRUE,
+                         ind = dimnames(gpa$coords)[[3]],
+                         land.pairs = pares, iter = 9999)
+summary(bilat)
+```
+<p align="center">
+<img src="assimtab.png" alt="Fig12" width="650" height="250">
+</p>
