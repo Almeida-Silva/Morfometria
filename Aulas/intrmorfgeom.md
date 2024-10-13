@@ -236,6 +236,34 @@ bilat <- bilat.symmetry(gpa, object.sym = TRUE,
                          land.pairs = pares, iter = 9999)
 summary(bilat)
 ```
+
 <p align="center">
-<img src="assimtab.png" alt="Fig12" width="650" height="250">
+<img src="assimtrtab.png" alt="Fig12" width="650" height="250">
 </p>
+
+Veja que aqui foram testados dois fatores, `ind` e `side`. O primeiro deles, `ind`, tem a ver com um conceito chamado *assimetria flutuante*, e foi pensado como um teste para acessá-la. Trata-se da diferença entre lados esquerdo e direito (ou ao longo de outro eixo de simetria) que não é causada por influências externas ou estruturais e, em vez disso, resulta de variações menores que ocorrem *entre indivíduos* (da mesma espécie, ou outro nível de agrupamento) em resposta a fatores ambientais ou biológicos. Mas na `bilat.symmetry()` o termo `ind` está testando apenas se a forma é distinta entre indivíduos, não isola especificamente as variações entre lados esquerdo e direito dentro de cada indivíduo. Sendo assim, a assimetria flutuante deveria ser testada pela interação entre `ind:side`, mas ela não tem p-valor associado na função e iria requerer testes adicionais. Então vamos focar no segundo fator, `side`. Ele verifica a existência da chamada *assimetria direcional*, que seria um padrão geral dentro da amostra. Na assimetria direcional existe a diferenciação da forma de um lado de maneira consistente em relação ao outro. É como o caso de espécies de peixes em que a maior parte dos indivíduos *tende* a ter a nadadeira esquerda consistentemente maior do que a nadadeira direita, por exemplo. Vemos que nossos dados apresentam esse efeito (`p-valor = 0,02` para o fator `side`), embora seja um efeito pequeno em relação às diferenças individuais (<i>R</i><sup>2</sup><sub>ind</sub> = 0.89; <i>R</i><sup>2</sup><sub>side</sub> < 0.01).
+
+```{r plotassim} 
+# Plotando o modelo
+plot(bilat)
+```
+
+<p align="center">
+<img src="simetrassim.png" alt="Fig13" width="600" height="600">
+</p>
+
+Ao plotar o nosso modelo do teste de assimetria, obtemos um painel cheio de informações gráficas. As duas plotagens na parte superior se assemelham bastante à saída da função `plotAllSpecimens()`, porque a ideia aqui também é entender a forma média dos dados e a distribuição dos landmarks de todos os indivíduos. O painel superior esquerdo, `Symmetric Shape Component` se refere a um cenário hipotético: como se esperaria que se distribuissem os landmarks da nossa amostra caso não houvesse *nenhuma assimetria*. Veja que isso não reflete a realidade, que é representada pelo painel superior direito, `Assymmetric Shape Component`. Nele, são apresentadas as variações assimétricas entre os lados esquerdo e direito, o que captura tanto a *assimetria direcional* quanto *flutuante* (ainda que não testada, como já discutimos) na morfologia dos indivíduos. Ambas são exploradas nas grades de distorção da parte de baixo do painel, e refletem a diferença existente entre o componente simétrico da forma (teórico) e os dados reais. No caso da assimetria direcional, `Mean Directional Asymmetry`é visualizada como a forma que se esperaria se todos os indivíduos tivessem o mesmo padrão de assimetria, sendo calculada como a média das assimetrias observadas entre todos os indivíduos em relação a um lado específico. Já na assimetria flutuante, `Mean Fluctuating Asymmetry` a função foca mais nas diferenças sistemáticas *entre os lados*.  
+
+Por fim, existe queria comentar que a `bilat.symmetry()` calcula um índice de assimetria; quanto menos simétrico for um indivíduo em relação à forma média da nossa amostra, maior vai ser esse índice. Ele pode ser acessado usando `bilat$unsigned.AI`. Podemos utilizá-lo para visualizar o quão assimétrico pode ser nosso conjunto de dados. Abaixo, estamos usando a função `which()` para acessar a variação entre o indivíduo *menos* e o *mais* assimétrico que temos:
+
+```{r limitesassimetria} 
+# Acessando a variação da forma entre o indivíduo com menor e maior assimetria na amostra
+plotRefToTarget(gpa$coords[,,which(dimnames(gpa$coords)[[3]]==names(which.min(bilat$unsigned.AI)))],
+                gpa$coords[,,which(dimnames(gpa$coords)[[3]]==names(which.max(bilat$unsigned.AI)))], 
+                mag = 0.75,  method = "vector") 
+```
+
+<p align="center">
+<img src="minmaxassim.png" alt="Fig14">
+</p>
+
