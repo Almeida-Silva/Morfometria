@@ -7,7 +7,7 @@ Bem-vindos à página da discplina de Morfometria Geométrica. Aqui serão dispo
 [Aulas 1 e 2](Aulas/morflinear.md)  
 Conceitos e aplicações da morfometria linear  
 
-[Aulas 3 e 4](Aulas/)  
+[Aulas 3 e 4](Aulas/intrmorfgeom.md)  
 Morfometria geométrica: espaço tangente, alometria, deformações da forma e simetria  
 
 [Aula 5](Aulas/)  
