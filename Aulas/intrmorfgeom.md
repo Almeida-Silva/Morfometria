@@ -52,7 +52,7 @@ plotAllSpecimens(land.dt)
 E compará-la com o resultado da GPA:
 
 ```{r coordprocrustes}
-plotAllSpecimens(gpa)
+plotAllSpecimens(gpa$coords)
 ```
 <p align="center">
 <img src="comgpa.png" alt="Fig2" width="400" height="400">
