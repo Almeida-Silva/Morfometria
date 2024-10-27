@@ -10,7 +10,7 @@ Conceitos e aplicações da morfometria linear
 [Aulas 3 e 4](Aulas/intrmorfgeom.md)  
 Morfometria geométrica: espaço tangente, alometria, deformações da forma e simetria  
 
-[Aula 5](Aulas/)  
+[Aula 5](Aulas/contour.md)  
 Contornos: semilandmarks e análise de Fourier  
 
 [Aula 6](Aulas/)  
