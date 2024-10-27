@@ -4,7 +4,7 @@ Landmarks do tipo III costumam ser empregados em situações nas quais a descri�
 
 ## 1. Semilandmarks
 Casos como este mostram que às vezes uma estrutura é melhor descrita por curvas do que através do posicionamento de pontos isolados. Nestes casos, é a forma da estrutura como um todo que é tomada como homóloga dentro da amostra. Assim definimos os chamados **semilandmarks**, como vimos durante a [aula 5](Aula%205.pdf). Na prática, a ideia é inserir diversos pontos para desenhar uma curva ao longo de um trecho de interesse e realizar um processo de reamostragem visando uniformizar a quantidade de pontos utilizada.  
-Fizemos isso em sala de aula. Geramos um conjunto de dados para 18 espécies de sapos do gênero *Rhinella*, que pode ser baixado [aqui](Rhinella.TPS). As imagens foram retiradas da literatura ([Caramaschi & Pombal Jr., 2006](https://doi.org/10.1590/S0031-10492006002300001); [Maciel et al., 2007](https://doi.org/10.11646/zootaxa.1627.1.2); [Maciel, 2008](https://www.researchgate.net/publication/47353552_Sistematica_e_biogeografia_do_grupo_Rhinella_marina_Linnaeus_1758_Anura_Bufonidae); [Narvaes & Rodrigues, 2009](https://doi.org/10.11606/issn.2176-7793.v40i1p1-73); [Vaz-Silva et al., 2015](https://doi.org/10.1655/HERPETOLOGICA-D-14-00039); [Rebouças et al., 2019](https://doi.org/10.2994/SAJH-D-17-00031.1); [Lehr et al., 2021](https://doi.org/10.3390/taxonomy1030015)), e utilizamos a conformação de landmarks proposta por [Bandeira et al., 2016](https://doi.org/10.1111/zoj.12460), com algumas alterações apresentadas nos últimos slides da [aula 5](Aula%205.pdf). Se quiserem treinar o posicionamento de landmarls no `TpsDig` podem fazer o download das figuras [aqui](Fotos_Aula5.zip).
+Fizemos isso em sala de aula. Geramos um conjunto de dados para 18 espécies de sapos do gênero *Rhinella*, que pode ser baixado [aqui](Rhinella.TPS). As imagens foram retiradas da literatura ([Caramaschi & Pombal Jr., 2006](https://doi.org/10.1590/S0031-10492006002300001); [Maciel et al., 2007](https://doi.org/10.11646/zootaxa.1627.1.2); [Maciel, 2008](https://www.researchgate.net/publication/47353552_Sistematica_e_biogeografia_do_grupo_Rhinella_marina_Linnaeus_1758_Anura_Bufonidae); [Narvaes & Rodrigues, 2009](https://doi.org/10.11606/issn.2176-7793.v40i1p1-73); [Vaz-Silva et al., 2015](https://doi.org/10.1655/HERPETOLOGICA-D-14-00039); [Rebouças et al., 2019](https://doi.org/10.2994/SAJH-D-17-00031.1); [Lehr et al., 2021](https://doi.org/10.3390/taxonomy1030015)), e utilizamos a conformação de landmarks proposta por [Bandeira et al., 2016](https://doi.org/10.1111/zoj.12460), com algumas alterações apresentadas nos últimos slides da [aula 5](Aula%205.pdf). Aqui a idéia é utilizar semilandmarks para caracterizar a forma das cristas cefálicas presentes em *Rhinella*, gerando uma forma pra cabeça. Se quiserem treinar o posicionamento de landmarls no `TpsDig` podem fazer o download das figuras [aqui](Fotos_Aula5.zip).
 
 ```{r data}
 # Definir o diretório de trabalho
@@ -83,5 +83,33 @@ plotRefToTarget(M1 = pca$shapes$shapes.comp2$min,
 ```
 
 <p align="center">
-<img src="vetoresGM_varforma.png" alt="Fig2" width="800" height="400">
+<img src="vetoresGM.png" alt="Fig3" width="800" height="400">
 </p>
+
+Do mesmo modo, também podemos testar alometria e outros efeitos, como demonstrado nas aulas passadas  
+
+```{r alometria}
+#Podemos testar o que quisermos agora. Como a alometria
+m1<-procD.lm(coords ~ log(Csize), data=gpa, size = gpa$Csize, iter = 9999)
+summary(m1)
+```
+<p align="center">
+<img src="alomtable_aula5.png" alt="Fig4" width="600" height="200">
+</p>
+
+Obviamente, os resultados da alometria podem ser melhor explorados (utilizando gráficos, grades de distorção, etc). Não vamos nos aprofundar para não ficar repetitivo, mas vocês podem acessar mais detalhes e scripts no material das [aulas 3 e 4](Aulas/intrmorfgeom.md).  
+
+
+## 2. Transformada Elíptica de Fourier
+Se por um lado podemos aumentar a distribuição de pontos usando *semilandmarks* para descrever melhor a morfologia, existe uma outra metodologia que visa caracterizar a forma sem a utilização de quaisquer marcos de referência. Trata-se da aplicação de transformadas elípticas de Fourier, técnica matemática usada para descrever e quantificar *a forma de contornos bidimensionais fechados de objetos*. Dessa maneira, está obrigatoriamente limitada ao `2D` e não pode ser aplicada a qualquer estrutura, mas ainda assim representa uma ferramenta poderosa para análises morfológicas.  
+Aqui vamos utilizá-la para analisar a forma das glândulas parotoides. São grandes glândulas localizadas dorsalmente, posterolaterais à cabeça, e que produzem uma secreção que atua como mecanismo de defesa para o grupo. A forma dessas glândulas varia bastante entre espécies, de modo que é uma característica importante para o gênero *Rhinella* do ponto de vista taxonômico.  
+A análise de Fourier é aplicada para identificar os contornos diretamente, de modo que precisam ser *muito* evidentes. Por esse motivo, é necessário realizar alguns tratamentos prévios nas imagens. O principal deles é transformar cada figura em binária, destacando nossa região de interesse em preto contra um fundo branco e salvando a imagem em escala de cinza. Você pode fazer isso em diversos programas de edição de imagens (particularmente, eu costumo usar o [GIMP](https://www.gimp.org/) por ser gratuito e intuitivo). Além disso, como não existe um sistema de referência de coordenadas associado, a transformada de Fourier não lida com o efeito do tamanho. Por isso, no tratamento prévio também é interessante corrigir as imagens originais para que todas tenham o mesmo tamanho. As figuras já tratadas podem ser baixadas [aqui](Fourier_Aula5). Salve essas figuras em uma subpasta a parte.  
+
+```{r dados_TF}
+# Indique onde está a pasta com as figuras
+caminho <- "C:/Users/Caminho/Para/A/Pasta/Das/Imagens/Tratadas/"
+
+# Agora é possível ler todas de uma única vez
+arquivos_imagens <- list.files(path = caminho_pasta, pattern = "\\.jpg$", full.names = TRUE)
+
+```
