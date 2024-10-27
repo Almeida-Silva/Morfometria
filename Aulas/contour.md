@@ -97,7 +97,7 @@ summary(m1)
 <img src="alomtable_aula5.png" alt="Fig4" width="600" height="200">
 </p>
 
-Obviamente, os resultados da alometria podem ser melhor explorados (utilizando gráficos, grades de distorção, etc). Não vamos nos aprofundar para não ficar repetitivo, mas vocês podem acessar mais detalhes e scripts no material das [aulas 3 e 4](Aulas/intrmorfgeom.md).  
+Obviamente, os resultados da alometria podem ser melhor explorados (utilizando gráficos, grades de distorção, etc). Não vamos nos aprofundar para não ficar repetitivo, mas vocês podem acessar mais detalhes e scripts no material das [aulas 3 e 4](intrmorfgeom.md).  
 
 
 ## 2. Transformada Elíptica de Fourier
