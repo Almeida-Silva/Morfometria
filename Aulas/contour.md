@@ -110,6 +110,64 @@ A análise de Fourier é aplicada para identificar os contornos diretamente, de 
 caminho <- "C:/Users/Caminho/Para/A/Pasta/Das/Imagens/Tratadas/"
 
 # Agora é possível ler todas de uma única vez
-arquivos_imagens <- list.files(path = caminho_pasta, pattern = "\\.jpg$", full.names = TRUE)
+imgs <- list.files(path = caminho, pattern = "\\.jpg$", full.names = TRUE)
 
 ```
+
+Uma vez que existe um objeto listando onde estão todas as imagens, vamos ler todas de uma única vez aplicando a função `import_jpg()`. As imagens importadas estarão salvas em um objeto do tipo `lista`, que costuma ser bastante complexo por aceitar objetos de natureza distinta em níveis e subníveis distintos. Para que os dados estejam no formato adequado para o pacote, precisamos extraí-los para um subnível mais acessível. Por isso, exercemos essa extração a cada indivíduo `x[[1]]`.
+
+```{r contornos}
+# Extrair os contornos das imagens com os ids
+contornos <- lapply(imgs, import_jpg)
+
+# Adequar a estrutura do objeto para que seja acessível às funções do pacote Momocs
+contornos <- lapply(contornos, function(x) x[[1]])
+
+# Transformando os contornos para a classe utilizada pelo pacote
+contornos <- Out(contornos)
+```
+
+Agora podemos visualizar as formas que extraímos usando a função `stack()`. Aqui os "eixos" apresentados mostram a posição de cada forma no `.jpg` lido.  
+```{r stack}
+stack(contornos)
+```
+<p align="center">
+<img src="stack_out.png" alt="Fig5">
+</p>
+
+Repare que os contornos podem estar plotados em qualquer lugar nessa figura, e isso acaba se tornando um problema na nossa análise porque a abordagem por Fourier não possui um mecanismo análogo à `GPA`. Por isso, precisamos nos certificar de que os dados serão centralizados para que sejam comparáveis. E isso é só o início. Também é importante ajustarmos a escala dos dados e a *quantidade de pontos de amostragem*. Acontece que a abordagem matemática por Fourier é baseada no conceito de **harmônicos**. É como se a análise partisse de uma forma elíptica simples que vai sendo moldada no formato dos contornos dos nossos objetos de estudo. Além disso, é como se esse processo de *modelagem* fosse realizado percorrendo seguidamente voltas ao longo dessa forma elíptica original. A quantidade de vezes que esse *percurso* é repetido é o nosso *número de harmônicos*. Já a quantidade de vezes em que é "checada" a diferença entre essa forma elíptica original e nossa forma de interesse é dada pelo número de pontos que descrevem nossa estrutura de interesse. Aqui no nosso caso, glândulas maiores precisam de mais pontos para terem seu contorno desenhado, o que significa que a caracterização de glândulas menores poderia atingir um bom nível mais rápido. Para evitar essa discrepância, vamos definir um número de pontos que queremos atribuir às glândulas de todos os 18 sapos. Após isso, o processo de centralização, correção de escala e do número de pontos (aumentando ou diminuindo) será automatiado através de um loop:   
+
+```{r loop_TF}
+# Defina o número desejado de pontos
+n.pts <- 500
+
+# Reamostrar contornos para o número desejado de pontos usando interpolação
+reamostragem <- lapply(contornos$coo, function(x) {
+  # Centralizar o contorno
+  x <- coo_center(x)
+  
+  # Escalar o contorno para remover o efeito do tamanho
+  x <- coo_scale(x)
+  
+  # Verifique se o contorno tem menos pontos do que o desejado
+  if (nrow(x) < n.pts) {
+    # Use coo_interpolate para aumentar o número de pontos
+    coo_interpolate(x, n = n.pts)
+  } else {
+    # Use coo_sample se já tiver mais pontos que o necessário
+    coo_sample(x, n = n.pts)
+  }
+})
+
+# Guardamos esses contornos corrigidos no nosso objeto original
+contornos$coo <- reamostragem
+```
+
+Se repetirmos o `stack()` agora, veremos que os dados parecem muito mais comparáveis.  
+```{r stack2}
+stack(contornos)
+```
+<p align="center">
+<img src="stack_out2.png" alt="Fig6" width="600" height="500">
+</p>
+
