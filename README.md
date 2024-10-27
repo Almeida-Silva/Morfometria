@@ -11,10 +11,10 @@ Conceitos e aplicações da morfometria linear
 Morfometria geométrica: espaço tangente, alometria, deformações da forma e simetria  
 
 [Aula 5](Aulas/contour.md)  
-Contornos: semilandmarks e análise de Fourier  
+Curvas e contornos: semilandmarks e análise de Fourier  
 
 [Aula 6](Aulas/)  
-Aplicações da morfometria geométrica em 3D: retrodeformação e outras coisas  
+Aplicações da morfometria geométrica em 3D: semilandmarks de superfície e retrodeformação  
 
 [Aulas 7 e 8](Aulas/)  
 Filogenia: forma média, disparidade morfológica e como a forma evolui ao longo do tempo e espaço  
