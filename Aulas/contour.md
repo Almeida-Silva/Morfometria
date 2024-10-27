@@ -23,4 +23,65 @@ dim(land.dt)
 ```
 
 Repare que `readcurves = TRUE` é usado para informar o `R` que os semilandmarks (que são apresentados como *curves* no `.tps`, podem abrir o arquivo no bloco de notas para confirmar) devem ser lidos. Outra informação importante é que o resultado para a função `dim()` é `[1] 101   2  18` O terceiro valor (`18`) se refere ao número de indivíduos no `Rhinella.TPS`; o segundo, representa o número de dimensões da amostragem (`2`, o que significa que os landmarks foram posicionados em material `2D`); já o primeiro valor (`101`) indica o número de *landmarks* lido pelo `R`. Em outras palavras, **todos** os pontos posicionados (sejam eles *landmarks* ou *semilandmarks*) são lidos da mesma maneira até aqui.  
-Consequentemente, precisamos 
+Veja que isso gera um impasse do ponto de vista da análise. Sabemos que *semilandmarks* são menos precisos na descrição da forma, já que *um único semilandmark* isolado *não descreve nenhuma estrutura anatômica por si só*. Por outro lado, *são necessários muitos pontos para descrever uma única curva*, o que os transforma em *maioria* dentro do `.tps` (veja que aqui temos 11 landmarks e 90 semilandmarks). Na prática, exercem um papel estatisticamente muito relevante.  
+Consequentemente, precisamos de alguma metodologia que permita *reduzir o peso dado aos semilandmarks na análise*. Isso é feito usando um processo chamado **deslizamento**, ou **sliding**. A ideia é de certo modo minimizar a distorção constatada localmente, nas regiões descritas por semilandmarks. Isso é feito em função da grade `tps` nessa região (a chamada minimização de *bending energy*), ou através de uma análise de Procrustes (`GPA`) usando as curvas separadamente. Para realizar o *sliding*, definimos quais as curvas no nosso conjunto de dados: 
+
+```{r curvas}
+# Defina os sliders para cada curva
+c1 <- define.sliders(11:42)
+c2 <- define.sliders(41:52)
+c3 <- define.sliders(51:82)
+c4 <- define.sliders(81:101)
+```
+
+Vale ressaltar que a função `define.sliders()` é aplicada indicando *entre quais pontos do tps estão os semilandmarks de uma determinada curva*. Pensando no nosso exemplo: se temos 11 landmarks, o ponto nº 12 será o primeiro semilandmark da primeira curva; se essa curva à qual ele pertence é formada por 30 semilandmarks, entao o último semilandmark que a compõe será o `12 + 29 = 41`; sendo assim, a curva 1 (`c1`) está limitada **entre** os pontos **11** e **42**.  
+Uma vez destacados quem são os semilandmarks e suas respectivas curvas, podemos indicá-los durante nossa `GPA`:
+
+```{r gpa}
+# Ajuste usando gpagen
+gpa <- gpagen(land.dt, curves = rbind(c1, c2, c3, c4), 
+              ProcD = FALSE)
+
+# Visualizemos os landmarks alinhados e suas respectivas identificações
+plotAllSpecimens(gpa$coords)
+text(gpa$coords[, , 1], labels = 1:nrow(gpa$coords), 
+     col = "red", cex = 0.8) # Ajuste `cex` conforme necessário
+```
+
+<p align="center">
+<img src="gpa_semiland.png" alt="Fig1" width="800" height="400">
+</p>
+
+A partir daí, podemos seguir normalmente com as análises, porque os dados já se encontram em um mesmo espaço da forma. 
+
+```{r pca}
+# Ajuste usando gpagen
+pca <- gm.prcomp(gpa$coords)
+
+# Gerando um dataframe
+df.pca <- pca$x[,1:3]
+
+# Plotando o morfoespaço
+ggplot(df.pca, aes(x=Comp1, y=Comp2))+
+  geom_point(size=4)+
+  theme_bw()
+```
+
+<p align="center">
+<img src="morfoesp_Aula5_GM.png" alt="Fig2" width="500" height="500">
+</p>
+
+Se rodarmos `summary(pca)`, veremos que os dois primeiros eixos da `PCA` explicam 53% da variação da forma. Também podemos visualizar as grades de deformação ao longo dos extremos do morfoespaço, em função do PC1...  
+```{r grade}
+plotRefToTarget(M1 = pca$shapes$shapes.comp1$min, 
+                M2 = pca$shapes$shapes.comp1$max, 
+                mag=1, method = "vector", useRefPts = F)
+
+plotRefToTarget(M1 = pca$shapes$shapes.comp2$min, 
+                M2 = pca$shapes$shapes.comp2$max, 
+                mag=1, method = "vector", useRefPts = F)
+```
+
+<p align="center">
+<img src="vetoresGM_varforma.png" alt="Fig2" width="800" height="400">
+</p>
