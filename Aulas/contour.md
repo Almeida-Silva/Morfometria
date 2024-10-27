@@ -101,9 +101,8 @@ Obviamente, os resultados da alometria podem ser melhor explorados (utilizando g
 
 
 ## 2. Transformada Elíptica de Fourier
-Se por um lado podemos aumentar a distribuição de pontos usando *semilandmarks* para descrever melhor a morfologia, existe uma outra metodologia que visa caracterizar a forma sem a utilização de quaisquer marcos de referência. Trata-se da aplicação de transformadas elípticas de Fourier, técnica matemática usada para descrever e quantificar *a forma de contornos bidimensionais fechados de objetos*. Dessa maneira, está obrigatoriamente limitada ao `2D` e não pode ser aplicada a qualquer estrutura, mas ainda assim representa uma ferramenta poderosa para análises morfológicas.  
-Aqui vamos utilizá-la para analisar a forma das glândulas parotoides. São grandes glândulas localizadas dorsalmente, posterolaterais à cabeça, e que produzem uma secreção que atua como mecanismo de defesa para o grupo. A forma dessas glândulas varia bastante entre espécies, de modo que é uma característica importante para o gênero *Rhinella* do ponto de vista taxonômico.  
-A análise de Fourier é aplicada para identificar os contornos diretamente, de modo que precisam ser *muito* evidentes. Por esse motivo, é necessário realizar alguns tratamentos prévios nas imagens. O principal deles é transformar cada figura em binária, destacando nossa região de interesse em preto contra um fundo branco e salvando a imagem em escala de cinza. Você pode fazer isso em diversos programas de edição de imagens (particularmente, eu costumo usar o [GIMP](https://www.gimp.org/) por ser gratuito e intuitivo). Além disso, como não existe um sistema de referência de coordenadas associado, a transformada de Fourier não lida com o efeito do tamanho. Por isso, no tratamento prévio também é interessante corrigir as imagens originais para que todas tenham o mesmo tamanho. As figuras já tratadas podem ser baixadas [aqui](Fourier_Aula5). Salve essas figuras em uma subpasta a parte.  
+Se por um lado podemos aumentar a distribuição de pontos usando *semilandmarks* para descrever melhor a morfologia, existe uma outra metodologia que visa caracterizar a forma sem a utilização de quaisquer marcos de referência. Trata-se da aplicação de transformadas elípticas de Fourier, técnica matemática usada para descrever e quantificar *a forma de contornos bidimensionais fechados de objetos*. Dessa maneira, está obrigatoriamente limitada ao `2D` e não pode ser aplicada a qualquer estrutura, mas ainda assim representa uma ferramenta poderosa para análises morfológicas. Aqui vamos utilizá-la para analisar a forma das glândulas parotoides. São grandes glândulas localizadas dorsalmente, posterolaterais à cabeça, e que produzem uma secreção que atua como mecanismo de defesa para o grupo. A forma dessas glândulas varia bastante entre espécies, de modo que é uma característica importante para o gênero *Rhinella* do ponto de vista taxonômico.  
+A análise de Fourier é aplicada para identificar os contornos diretamente, de modo que precisam ser *muito* evidentes. Por esse motivo, é necessário realizar alguns tratamentos prévios nas imagens. O principal deles é transformar cada figura em binária, destacando nossa região de interesse em preto contra um fundo branco e salvando a imagem em escala de cinza. Você pode fazer isso em diversos programas de edição de imagens (particularmente, eu costumo usar o [GIMP](https://www.gimp.org/) por ser gratuito e intuitivo). Além disso, como não existe um sistema de referência de coordenadas associado, efeitos como o tamanho são um tema delicado na transformada de Fourier. Por isso, no tratamento prévio também é interessante corrigir as imagens originais para que todas mantenham uma mesma escala. As figuras já tratadas podem ser baixadas [aqui](Fourier_Aula5). Salve essas figuras em uma subpasta a parte.  
 
 ```{r dados_TF}
 # Indique onde está a pasta com as figuras
@@ -135,7 +134,7 @@ stack(contornos)
 <img src="stack_out.png" alt="Fig5">
 </p>
 
-Repare que os contornos podem estar plotados em qualquer lugar nessa figura, e isso acaba se tornando um problema na nossa análise porque a abordagem por Fourier não possui um mecanismo análogo à `GPA`. Por isso, precisamos nos certificar de que os dados serão centralizados para que sejam comparáveis. E isso é só o início. Também é importante ajustarmos a escala dos dados e a *quantidade de pontos de amostragem*. Acontece que a abordagem matemática por Fourier é baseada no conceito de **harmônicos**. É como se a análise partisse de uma forma elíptica simples que vai sendo moldada no formato dos contornos dos nossos objetos de estudo. Além disso, é como se esse processo de *modelagem* fosse realizado percorrendo seguidamente voltas ao longo dessa forma elíptica original. A quantidade de vezes que esse *percurso* é repetido é o nosso *número de harmônicos*. Já a quantidade de vezes em que é "checada" a diferença entre essa forma elíptica original e nossa forma de interesse é dada pelo número de pontos que descrevem nossa estrutura de interesse. Aqui no nosso caso, glândulas maiores precisam de mais pontos para terem seu contorno desenhado, o que significa que a caracterização de glândulas menores poderia atingir um bom nível mais rápido. Para evitar essa discrepância, vamos definir um número de pontos que queremos atribuir às glândulas de todos os 18 sapos. Após isso, o processo de centralização, correção de escala e do número de pontos (aumentando ou diminuindo) será automatiado através de um loop:   
+Repare que os contornos podem estar plotados em qualquer lugar nessa figura, e isso acaba se tornando um problema na nossa análise porque a abordagem por Fourier não possui uma `GPA`. Mais adiante vou demonstrar que até existe um processo de normalização que é tido como *análogo*, mas que acaba sendo problemático em um aspecto importante do nosso conjunto de dados. Sendo assim, precisamos nos certificar de que os dados serão centralizados para que sejam comparáveis. E isso é só o início. Também é importante ajustarmos a escala dos dados e a *quantidade de pontos de amostragem*. Acontece que a abordagem matemática por Fourier é baseada no conceito de **harmônicos**. É como se a análise partisse de uma forma elíptica simples que vai sendo moldada no formato dos contornos dos nossos objetos de estudo. Além disso, é como se esse processo de *modelagem* fosse realizado percorrendo seguidamente voltas ao longo dessa forma elíptica original. A quantidade de vezes que esse *percurso* é repetido é o nosso *número de harmônicos*. Já a quantidade de vezes em que é "checada" a diferença entre essa forma elíptica original e nossa forma de interesse é dada pelo número de pontos que descrevem nossa estrutura de interesse. Aqui no nosso caso, glândulas maiores precisam de mais pontos para terem seu contorno desenhado, o que significa que a caracterização de glândulas menores poderia atingir um bom nível mais rápido. Para evitar essa discrepância, vamos definir um número de pontos que queremos atribuir às glândulas de todos os 18 sapos. Após isso, o processo de centralização, correção de escala e do número de pontos (aumentando ou diminuindo) será automatiado através de um loop:   
 
 ```{r loop_TF}
 # Defina o número desejado de pontos
@@ -171,3 +170,47 @@ stack(contornos)
 <img src="stack_out2.png" alt="Fig6" width="600" height="500">
 </p>
 
+Também podemos observar quais são todas as formas de glândulas que estão presentes em nossa amostra  
+```{r painel}
+panel(contornos, col="gray")
+```
+<p align="center">
+<img src="painel.png" alt="Fig7" width="620" height="500">
+</p>
+
+A partir de agora, podemos buscar o número ideal de harmônicos necessário para representar a forma das glândulas de *Rhinella*. 
+```{r numharmonicos}
+# Definindo os harmônicos. O número máximo é dado pelo nº pontos/2
+hpow <- calibrate_harmonicpower_efourier(contornos, nb.h=n.pts/2)
+print(hpow$minh)
+```
+
+Com isso, vemos que 99% da forma já é bem definida usando 17 harmônicos na nossa amostra. Podemos, inclusive, observar como o aumento no número de harmônicos vai se ajustando aos contornos de uma determinada forma. Para isso, vamos ver o impacto de todos os harmônicos utilizados sobre os contornos da espécie nº 17:
+```{r calibragem}
+# Vendo o ajuste dos harmônicos a um indivíduo específico
+calibrate_reconstructions_efourier(contornos, id = 17, range = 1:17)
+```
+<p align="center">
+<img src="calibragem.png" alt="Fig8" width="375" height="520">
+</p>
+
+Por fim, aplicamos a análise de Fourier aos contornos. Repare que o argumento `norm = T` se refere ao processo de normalização dos dados que citei acima. Nele, é esperada uma espécie de correção por escala, orientação e posição do conjunto de dados. O problema é que esse tipo de correção numa `GPA` é feita levando-se em consideração um sistema de referência: as posições relativas dos landmarks na morfometria geométrica permitem que a análise rotacione o conjunto de dados sem perda do significado biológico. Imagine que temos 4 landmarks indicando o ponto mais anterior, o mais posterior e os dois pontos que definem o eixo de maior largura na glândula dos sapos do nosso dataset. Se respeitamos o posicionamento de landmarks mantendo a mesma ordem, então a `GPA` vai alinhar todas as glândulas em um mesmo sentido porque os landmarks vão atuar como um *sistema de referência*. O problema é que isso não existe na análise de Fourier. Sendo assim, se houver um sapo que possui a região anterior mais larga que a posterior, e outro em que ocorre o contrário, a rotação vai sobrepor regiões que não são comparáveis. Talvez estruturas mais complexas permitam esse tipo de normalização direta, mas preferi aplicar um pré-tratamento nos dados com o loop que apresentei anteriormente. Com isso, já temos uma orientação prévia condizente com o significado biológico, e atribuir a normalização dos dados agora passa a ser uma espécie de *ajuste fino*. Por isso, mantemos `norm = T`.    
+
+```{r calibragem}
+# Análise elíptica de Fourier
+rhinel_efa <- efourier(contornos, norm = T, nb.h = 17)
+```
+ 
+Para finalizar, podemos gerar uma `PCA` afim de obter uma representação do morfoespaço obtido:
+```{r PCA_fourier}
+# PCA
+rhinel_pca <- PCA(rhinel_aef)
+
+# Plotando o morfoespaço
+PCA.fourier<-plot_PCA(rhinel_pca, morphospace = F, zoom = 1, center_origin = T)
+plot_PCA(rhinel_pca, 
+         layer_morphospace_PCA(PCA.fourier, nr=7, nc=7, col="darkgray", size = 0.7))
+```
+<p align="center">
+<img src="morfospc_fourier.png" alt="Fig9" width="520" height="375">
+</p>
