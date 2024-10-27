@@ -212,7 +212,7 @@ plot_PCA(rhinel_pca,
          layer_morphospace_PCA(PCA.fourier, nr=7, nc=7, col="darkgray", size = 0.7))
 ```
 <p align="center">
-<img src="morfospc_fourier.png" alt="Fig9" width="520" height="375">
+<img src="morfospc_fourier.png" alt="Fig9" width="780" height="563">
 </p>
 
  
