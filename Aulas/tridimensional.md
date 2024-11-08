@@ -97,3 +97,78 @@ plotAllSpecimens(gpa$coords)
 </p>
 
 Veja que os pontos referentes aos semilandmarks se deslocam *conjuntamente*. Isso fica bem evidente na região central, onde estão dispostos os semilandmarks de superfície: veja que os pontos não se encontram forçosamente alinhados entre distintos indivíduos, esse processo é feito tendo em conta a superfície como um todo. Na prática, isso reduz o efeito dessa quantidade enorme (`n=200`) de pontos para a descrição da forma do nosso dataset.
+
+```{r pca1}
+###PCA
+pca<-gm.prcomp(gpa$coords)
+summary(pca)
+
+fig1<-ggplot(as.data.frame(pca$x), 
+             aes(x = Comp1, y = Comp2, 
+                label = rownames(as.data.frame(pca$x)))) + 
+  geom_point(fill = "cornflowerblue", size = 5, pch=21) +  
+  scale_x_continuous(limits = c(-0.2, 0.3)) +
+  scale_y_continuous(limits = c(-0.25, 0.1)) +
+  # Pontos para os PC1 e PC2 
+  geom_text(aes(label = rownames(as.data.frame(pca$x))), hjust = 0.62, vjust = 1.5,
+            color = "darkgray") +  # Rótulos 
+  labs(x = "PC1", y = "PC2") +  
+  theme_bw()
+fig1
+```
+
+<p align="center">
+<img src="Aula6_mfspc1.png" alt="Fig1" width="400" height="400">
+</p>
+
+A grade de distorção da forma é apresentada em dois eixos (a menos que você use `method = "vector"`, que apresenta a variação da forma através de uma janela 3D interativa).
+
+```{r tps1}
+#Ex: a distorção da forma esperada no valor máximo do PC1
+plotRefToTarget(M1 = gpa$consensus,
+                M2 = pca$shapes$shapes.comp1$max)
+```
+<p align="center">
+<img src="A6_PC1-TPSmax.png" alt="Fig2" width="600" height="450">
+</p>
+
+## 2. Retrodeformação
+Até aqui, tudo tranquilo. Mas lembra que temos um fóssil entre os nossos dados? No início dessa página identificamos que `Electrorana_limoae` ocupava a *terceira* posição no nosso dateset, inclusive. O problema é que fósseis geralmente sofrem deformação, o que certamente influencia nos resultados de uma análise de morfometria geométrica. Por esse motivo, é indicada a realização prévia de um processo chamado *retrodeformação*. Nele, os dados são corrigidos dada a bilateralidade esperada para os espécimes. Trata-se de uma interpolação da forma através do espelhamento dos landmarks e cálculo da média entre a posição dos pontos espelhados e os originais.  
+Sendo assim, precisamos definir quais landmarks representam pares entre si, o que é relativamente simples para os landmarks fixos e semilandmarks de curvas (**importantíssimo:** lembre-se de respeitar a *direção* quando estiver posicionando pontos para descrever curvas pareadas):
+
+```{r pares1}
+# Landmarks fixos
+fixed_pares <- matrix(data = c(1,2,
+                               3,4,
+                               5,6,
+                               7,8,
+                               9,10,
+                               11,12,
+                               13,14,
+                               15,16,
+                               17,18,
+                               19,20), 
+                      ncol = 2, byrow = TRUE)
+
+# Curvas: c1 com c2, c3 com c4, c5 com c6
+# Extrair apenas a coluna "slide" (a segunda coluna) para criar os pares
+curves_pares <- rbind(
+  cbind(c1[, 2], c2[, 2]),  # Parear c1 com c2
+  cbind(c3[, 2], c4[, 2]),  # Parear c3 com c4
+  cbind(c5[, 2], c6[, 2])   # Parear c5 com c6
+)
+```
+No entanto, o pareamento dos semilandmarks que formam a superfície ventral do paraesfenóide passa a ser um problema. Veja como estão distribuídos esses pontos abaixo. Lembrando que o primeiro semilandmark de superfície é o `154`, enquanto o último é o número `343`
+```{r pares2}
+# Vamos atualizar novamente o gpa para conter apenas os dados de superfície
+gpa<-gpagen(land.dt[154:343,,])
+plotAllSpecimens(gpa$coords)
+
+# E mapear os números referentes a esses pontos
+plot(gpa$coords[,,1])
+text(gpa$coords[,,1][,1], gpa$coords[,,1][,2], col="red", adj = c(0,0))
+```
+<p align="center">
+<img src="A6_DistrSuprfc.png" alt="Fig3" width="800" height="500">
+</p>
+O ponto `1` faz par com o ponto `91`, o `19` com o `89`... e tudo muda no centro do eixo x, onde existe uma divisão entre dois patches posicionados. Como se não bastasse, o número `1` apresentado na imagem em realidade equivale ao número `154`. Tudo isso torna o padrão bastante desafiador. 
