@@ -301,14 +301,70 @@ gpa<-gpagen(land.dt.NA,
             surfaces = s,
             ProcD = FALSE)
 ```
-Com isso geramos uma nova PCA, afim de visualizar o terceiro morfoespaço desse tutorial.
+Com isso geramos uma nova PCA, afim de visualizar o terceiro morfoespaço desse tutorial. 
+
 ```{r pca3}
 ### PCA
 pca<-gm.prcomp(gpa$coords)
 
-
+## Gerando o novo morfoespaço
+fig3<-ggplot(as.data.frame(pca$x), 
+             aes(x = Comp1, y = Comp2, 
+                 label = rownames(as.data.frame(pca$x)))) + 
+  geom_point(fill = "cornflowerblue", size = 5, pch=21) +  
+  scale_x_continuous(limits = c(-0.2, 0.3)) +
+  scale_y_continuous(limits = c(-0.2, 0.15)) +
+  # Pontos para os PC1 e PC2 
+  geom_text(aes(label = rownames(as.data.frame(pca$x))), hjust = 0.55, vjust = 1.5,
+            color = "darkgray") +  # Rótulos 
+  labs(x = "PC1", y = "PC2") +  
+  theme_bw()
+fig3
 ```
 
 <p align="center">
-<img src="A6_PC1-TPSmax.png" alt="Fig2" width="600" height="450">
+<img src="Aula6_mfspc3.png" alt="Fig6" width="400" height="400">
 </p>
+
+Repare que o morfoespaço aqui obtido se parece mais ao primeiro do que o último. Provavelmente isso aconteceu por conta da estimativa de missing landmarks ter sido realizada em função da redução na distorção da grade, o que acabou minizando o efeito da distorção gerada pela deformação prévia existente no fóssil e o efeito da retrodeformação foi pouco sentido. Obviamente, cada caso terá suas consequências particulares, a ideia aqui é apenas apresentar as ferramentas. 
+
+## 4. Bônus: visualização da deformação 3D
+De modo análogo ao que a função `plotRefToTarget()` faz, gerando a deformação em uma forma hipotética esperada, é possível gerar uma mesh deformada a partir de um modelo 3D para explorar o morfoespaço. Para isso, primeiramente devemos fazer a leitura no `R` da mesh mais próxima do centro do espaço da forma. No nosso caso particular, trata-se de `Craugastor_laticeps`. Ela pode ser baixada [aqui](Craugastor_laticeps_v0.ply).
+
+```{r mesh}
+# Fazendo a leitura da mesh
+mesh <- read.ply("Craugastor_laticeps_v0.ply")
+```
+Agora vamos investigar como seria o crânio de uma espécie que ocupasse a posição equivalente ao valor mínimo do `PC1`. Para isso, veja que estou utilizando o conjunto de dados `land.dt`, já que não há motivos para estimar landmarks nele. A função do nosso interesse é a `warpRefMesh()`, que funciona indicando (1) nossa mesh original como primeiro argumento, (2) os landmarks atribuídos a esse primeiro espécime para que a função associe cada posição anatômica a um conjunto de triângulos e vértices da mesh e (3) o valor esperado para cada landmark no nosso ponto desejado do morfoespaço.
+
+```{r warprefmesh_min}
+## Atualizando o objeto gpa para usar novamente o conjunto de dados completo
+gpa<-gpagen(land.dt, 
+            curves = rbind(c1, c2, c3, c4, c5, c6),
+            surfaces = s,
+            ProcD = FALSE)
+
+## Usando a função warpRefMesh para estimar a forma do crânio esperada no valor mínimo do PC1 
+warpRefMesh(mesh = mesh, 
+            mesh.coord = land.dt[,,which(dimnames(land.dt)[[3]]=="Craugastor_laticeps")],
+            ref = pca$shapes$shapes.comp1$min, 
+            color = "cyan", centered = F)
+```
+É um processo um pouco lento, porque envolve renderização. No fim das contas, isso é o que obtemos:  
+<p align="center">
+  <img src="Def_min_infinito.gif" alt="Fig7">
+</p>
+
+O mesmo processo pode ser usado para encontrar qualquer ponto no morfoespaço, como a forma esperada no valor máximo do PC1:
+```{r warprefmesh_max}
+## Usando a função warpRefMesh para estimar a forma do crânio esperada no valor máximo do PC1 
+warpRefMesh(mesh = mesh, 
+            mesh.coord = land.dt[,,which(dimnames(land.dt)[[3]]=="Craugastor_laticeps")],
+            ref = pca$shapes$shapes.comp1$max, 
+            color = "firebrick", centered = F)
+```
+É um processo um pouco lento, porque envolve renderização. No fim das contas, isso é o que obtemos:  
+<p align="center">
+  <img src="Def_max_infinito.gif" alt="Fig8">
+</p>
+
