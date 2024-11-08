@@ -39,7 +39,7 @@ plotAllSpecimens(gpa$coords)
 
 Daí por diante, todos os demais são semilandmarks. Os primeiros correspondem às curvas, porque essa foi a ordem seguida durante o posicionamento no IDAV Landmark Editor. Se temos duas curvas de 30 pontos seguidas de outras quatro formadas por 20, então os próximos 140 pontos representam semilandmarks de curvas.
 
-```{r landmarks}
+```{r semilandmarks_c}
 ####As nossas curvas são de 30+30+20+20+20+20 = 140ldk. 
 #De 22 a 162, portanto, estamos descrevendo curvas
 gpa<-gpagen(land.dt[22:162,,])
@@ -54,7 +54,7 @@ plotAllSpecimens(gpa$coords)
 
 Já a nossa superfície é descrita por 200 pontos, começando a partir do 143 e indo até o último presente. Para tornar o script mais genérico, vamos definir que estamos selecionando os seilandmarks do objeto `land.dt` entre `163:dim(land.dt)[1]` (ou seja, partindo de 163 até o último ponto disponível).
 
-```{r landmarks}
+```{r semilandmarks_s}
 ####As nossa superfície vai daí em diante: [143,dim(land.dt)[1]] = 200 ldk
 gpa<-gpagen(land.dt[163:dim(land.dt)[1],,])
 #gpa<-gpagen(land.dt)
@@ -66,3 +66,34 @@ plotAllSpecimens(gpa$coords)
   <img src="Aula6_superficie.png" alt="Gráfico Interativo" title="Clique na figura" width="600" height="450">
 </a>
 </p>
+
+Agora que conhecemos melhor os nossos dados, vamos definir os subconjuntos que receberão tratamentos distintos e realizar uma `GPA` indicando tudo isso propriamente:
+
+```{r def}
+#Sendo assim vamos definir cada um deles. Primeiro as curvas
+c1 <- define.sliders(22:49) #angulosplenial, lado esquerdo
+c2 <- define.sliders(50:77) #angulosplenial, lado direito
+c3 <- define.sliders(78:96) #ramo medial do pterigóide, lado direito
+c4 <- define.sliders(97:115) #ramo medial do pterigóide, lado esquerdo
+c5 <- define.sliders(116:134) #ramo anterior do pterigóide, lado direito
+c6 <- define.sliders(135:153) #ramo anterior do pterigóide, lado esquerdo
+
+#Depois a superfície
+s <- c(154:343)
+
+###Procrustes
+gpa<-gpagen(land.dt, 
+            curves = rbind(c1, c2, c3, c4, c5, c6),
+            surfaces = s,
+            ProcD = FALSE )
+
+#Visualizando
+plotAllSpecimens(gpa$coords)
+```
+<p align="center">
+<a href="https://752ynx-diego-almeida0silva.shinyapps.io/Aula6_GPA1/">
+  <img src="Aula6_GPA1.png" alt="Gráfico Interativo" title="Clique na figura" width="600" height="450">
+</a>
+</p>
+
+Veja que os pontos referentes aos semilandmarks se deslocam *conjuntamente*. Isso fica bem evidente na região central, onde estão dispostos os semilandmarks de superfície: veja que os pontos não se encontram forçosamente alinhados entre distintos indivíduos, esse processo é feito tendo em conta a superfície como um todo. Na prática, isso reduz o efeito dessa quantidade enorme (`n=200`) de pontos para a descrição da forma do nosso dataset.
