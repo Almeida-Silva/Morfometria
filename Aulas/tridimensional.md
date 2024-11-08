@@ -171,4 +171,90 @@ text(gpa$coords[,,1][,1], gpa$coords[,,1][,2], col="red", adj = c(0,0))
 <p align="center">
 <img src="A6_DistrSuprfc.png" alt="Fig3" width="800" height="500">
 </p>
+
 O ponto `1` faz par com o ponto `91`, o `19` com o `89`... e tudo muda no centro do eixo x, onde existe uma divisão entre dois patches posicionados. Como se não bastasse, o número `1` apresentado na imagem em realidade equivale ao número `154`. Tudo isso torna o padrão bastante desafiador. 
+
+```{r pareamento_s}
+# Primeira parte dos landmarks de superfície, primeiro lado
+s.l1_part1 <- array(1:50)
+# Segunda parte dos landmarks de superfície, primeiro lado
+c.60<-array(51:60)
+c.70<-array(61:70)
+c.80<-array(71:80)
+c.90<-array(81:90)
+c.100<-array(91:100)
+s.l1_part2 <- c(c.100,c.90,c.80,c.70,c.60)
+
+# Primeira parte dos landmarks de superfície, segundo lado
+s.l2_part1 <- array(101:145)
+# Segunda parte dos landmarks de superfície, segundo lado
+c.154<-array(146:154)
+c.163<-array(155:163)
+c.172<-array(164:172)
+c.181<-array(173:181)
+c.190<-array(182:190)
+s.l2_part2 <- c(c.190,c.181,c.172,c.163,c.154)
+
+# Agora podemos juntar os semilandmarks referentes a cada lado do paraesfenóide
+s.pares_l1<-cbind(s.l1_part1,s.l1_part2)
+s.pares_l2<-cbind(s.l2_part1,s.l2_part2)
+
+# Combinar as duas partes
+s.pares <- rbind(s.pares_l1, s.pares_l2)
+
+# Agora voltemos ao conjunto completo de dados, somando aos 153 pontos anteriores
+s.pares <- s.pares + 153
+
+# E removemos os nomes das colunas, porque já não refletem os dados que temos
+colnames(s.pares) <- NULL
+```
+
+Ótimo! Feito todo esse processo, finalmente podemos realizar a *retrodeformação*:
+```{r retrodeformacao}
+# Retrodeformação
+retrodef<-retroDeform3d(
+  land.dt[,,which(dimnames(land.dt)[[3]]=="Electrorana_limoae")], 
+                        pares)
+
+# Transformemos esses dados em um array
+retrodef<-as.array(retrodef$deformed)
+
+# E vamos adicionar a informação de que se trata de apenas um indivíduo nas dimensões do objeto 
+dim(retrodef)[3]<-1
+
+# Podemos visualizar o resultado da retrodeformação abaixo
+plotAllSpecimens(retrodef)
+```
+<p align="center">
+  <img src="Electrorana_retrodef_ldk.gif" alt="Fig4" title="Clique na figura">
+</p>
+
+*Voila!* Finalmente temos os dados com menor distorção possível. Agora podemos assumir que as divergências na forma do fóssil em relação aos outros crânios pode ser interpretada como parte de seu significado biológico. Por isso, vamos fazer a análise de Procrustes com todo o conjunto de dados para gerar um morfoespaço mais adequado.
+```{r retrodeformacao}
+## Atualizando o conjunto de dados original
+land.dt[,,3]<-retrodef
+
+###Procrustes
+gpa<-gpagen(land.dt, 
+            curves = rbind(c1, c2, c3, c4, c5, c6),
+            surfaces = s,
+            ProcD = FALSE)
+
+### PCA
+pca<-gm.prcomp(gpa$coords)
+summary(pca)
+
+## Visualizando o morfoespaço
+fig2<-ggplot(as.data.frame(pca$x), 
+             aes(x = Comp1, y = Comp2, 
+                 label = rownames(as.data.frame(pca$x)))) + 
+  geom_point(fill = "cornflowerblue", size = 5, pch=21) +  
+  scale_x_continuous(limits = c(-0.2, 0.3)) +
+  scale_y_continuous(limits = c(-0.2, 0.15)) +
+  # Pontos para os PC1 e PC2 
+  geom_text(aes(label = rownames(as.data.frame(pca$x))), hjust = 0.62, vjust = 1.5,
+            color = "darkgray") +  # Rótulos 
+  labs(x = "PC1", y = "PC2") +  
+  theme_bw()
+fig2
+```
