@@ -368,3 +368,4 @@ warpRefMesh(mesh = mesh,
   <img src="Def_max-infinito.gif" alt="Fig8">
 </p>
 
+Esses são modelos tridimensionais reais, que podem ser facilmente exportados com a função `writePLY()`. Você pode utilizar estes modelos para melhor ilustrar seu morfoespaço por exemplo, editando as imagens em softwares apropriados. Eu, particularmente, costumo utilizar o [Inkscape](https://inkscape.org/) para isso por ser *open source*.
