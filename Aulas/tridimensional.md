@@ -365,6 +365,6 @@ warpRefMesh(mesh = mesh,
 ```
 É um processo um pouco lento, porque envolve renderização. No fim das contas, isso é o que obtemos:  
 <p align="center">
-  <img src="Def_max_infinito.gif" alt="Fig8">
+  <img src="Def_max-infinito.gif" alt="Fig8">
 </p>
 
