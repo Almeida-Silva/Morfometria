@@ -13,7 +13,7 @@ Morfometria geométrica: espaço tangente, alometria, deformações da forma e s
 [Aula 5](Aulas/contour.md)  
 Curvas e contornos: semilandmarks e análise de Fourier  
 
-[Aula 6](Aulas/)  
+[Aula 6](Aulas/tridimensional.md)  
 Aplicações da morfometria geométrica em 3D: semilandmarks de superfície e retrodeformação  
 
 [Aulas 7 e 8](Aulas/)  
