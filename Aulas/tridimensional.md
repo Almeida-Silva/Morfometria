@@ -230,7 +230,7 @@ plotAllSpecimens(retrodef)
 </p>
 
 *Voila!* Finalmente temos os dados com menor distorção possível. Agora podemos assumir que as divergências na forma do fóssil em relação aos outros crânios pode ser interpretada como parte de seu significado biológico. Por isso, vamos fazer a análise de Procrustes com todo o conjunto de dados para gerar um morfoespaço mais adequado.
-```{r retrodeformacao}
+```{r gpa_retrodef}
 ## Atualizando o conjunto de dados original
 land.dt[,,3]<-retrodef
 
@@ -258,3 +258,57 @@ fig2<-ggplot(as.data.frame(pca$x),
   theme_bw()
 fig2
 ```
+<p align="center">
+<img src="Aula6_mfspc2.png" alt="Fig5" width="400" height="400">
+</p>
+
+Você pode usar `plotRefToTarget()` para visualizar se houveram mudanças na distorção da forma usando ou não a retrodeformação. Não vou repetir aqui porque o tutorial já está bastante longo. 
+
+## 3. Estimando missing data
+E se o cenário fosse pior? Na paleontologia, é comum que os materiais disponíveis não estejam completos. E muitas vezes isso afeta diretamente uma região que receberia landmarks, o que gera os chamados `missing data`. Em programas como o IDAV Landmark Editor é possível marcar um landmark específico como `ausente` e, basicamente, isso será lido pelo `R` como `NA`. A solução é utilizar um método para estimar *onde* se espera que se localizaria o landmark perdido. Vocês podem encontrar detalhes e demonstrações sobre os métodos disponíveis acessando [este curso](https://geomorphr.github.io/GMcourse/Lectures/13-MissingDataShapeSubComp.html#1). Mas adianto que os mais eficientes são baseados em *interpolação*, uma abordagem matemática que busca inferir valores em um conjunto de dados através de técnicas distintas. Vamos utilizar uma segunda versão do conjunto de dados usado até aqui, agora removendo os landmarks nº 7, 9 e 13 do nosso fóssil. Vocês podem baixar essa versão do conjunto de dados [aqui](Aula_6-dtamissing.zip). São eles que serão lidos abaixo:   
+```{r missing_dados}
+# Definir o diretório de trabalho para a pasta do novo conjunto de dados
+setwd("C:/caminho/para/pasta/desejada")
+
+# Listando os arquivos .dta em um objeto...
+lista<-list.files(pattern = ".dta")
+# (...) e usando esse objeto para leitura
+land.dt.NA<-readmulti.nts(lista)
+```
+Repare que a mensagem `NOTE.  Missing data identified.NOTE.  Missing data identified.` aparece, como um aviso. Corrigimos esse problema usando a função `estimate.missing()`, e sua aplicação no `R` é bastante simples na realidade:  
+
+```{r estimate}
+# Estimando através da grade de distorção da forma
+estimado<-estimate.missing(land.dt.NA, method = "TPS")
+```
+Mas é importante procurar entender o que está acontecendo por trás. O argumento `method = "TPS"` visa estimar os landmarks ausentes através da menor distorção possível no espaço da forma que seria gerado pelos landmarks completos, de modo a minimizar a interferência daquilo que foi inferido sobre o todo. Costuma ter ótimos resultados, assim como `method = "Reg"`. No entanto, nesse último caso a posição do ponto ausente é inferida a partir de uma regressão iinear. Aqui são considerados apenas os indivíduos que possuem todos os landmarks devidamente digitalizados, e a relação entre o landmark ausente e a posição dos pontos presentes é levada em consideração. Idealmente, esse método é indicado quando há apenas um landmark a inferir.  
+Obtida a estimativa, podemos utilizar o conjunto de dados para realizar a *retrodeformação* e, novamente, a *análise de Procrustes*. 
+
+```{r retrodef2}
+## Retrodeformação
+retrodef2<-retroDeform3d(estimado[,,which(dimnames(estimado)[[3]]=="Electrorana_limoae")], 
+                        pares)
+
+retrodef2<-as.array(retrodef2$deformed)
+dim(retrodef2)[3]<-1
+
+## Atualizando o conjunto de dados original
+land.dt.NA[,,3]<-retrodef2
+
+### Procrustes
+gpa<-gpagen(land.dt.NA, 
+            curves = rbind(c1, c2, c3, c4, c5, c6),
+            surfaces = s,
+            ProcD = FALSE)
+```
+Com isso geramos uma nova PCA, afim de visualizar o terceiro morfoespaço desse tutorial.
+```{r pca3}
+### PCA
+pca<-gm.prcomp(gpa$coords)
+
+
+```
+
+<p align="center">
+<img src="A6_PC1-TPSmax.png" alt="Fig2" width="600" height="450">
+</p>
