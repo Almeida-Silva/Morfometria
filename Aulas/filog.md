@@ -27,4 +27,47 @@ land.dt<-readland.tps("Rhinella.TPS", specID = "imageID", readcurves = TRUE)
 # Verificando o número de dimensões do nosso tps
 dim(land.dt)
 ```
-A maneira mais simples de relacionar a ocupação do morfoespaço à filogenia é através da realização de um `filomorfoespaço`. Esse será o nosso primeiro objetivo no R e, para isso, vamos precisar: `1)` ler uma filogenia ultramétrica (e idealmente datada!) disponível na literatura (clique aqui para fazer o download da filogenia de Portik et al. 2022, a mais recente para Anura); e `2)` cortar a filogenia de modo a manter apenas os terminais para os quais temos espécies representadas (no caso, as do gênero *Rhinella* que podem ser acessadas através de `dimnames(land.dt)[[3]]`)
+A maneira mais simples de relacionar a ocupação do morfoespaço à filogenia é através da realização de um `filomorfoespaço`. Esse será o nosso primeiro objetivo no R e, para isso, vamos precisar: `1)` ler uma filogenia ultramétrica (e idealmente datada!) disponível na literatura (clique [aqui](TreePL-Rooted_Anura_bestTree.tre) para fazer o download da filogenia de [Portik et al. 2023](https://doi.org/10.1016/j.ympev.2023.107907), a mais recente para Anura); e `2)` cortar a filogenia de modo a manter apenas os terminais para os quais temos espécies representadas (no caso, as do gênero *Rhinella* que podem ser acessadas através de `dimnames(land.dt)[[3]]`).
+
+```{r filogenia}
+# Lendo a filogenia
+tree<-read.tree("TreePL-Rooted_Anura_bestTree.tre")
+
+# Se quisermos ver as espécies que coincidem entre os dois objetos
+intersect(dimnames(land.dt)[[3]], tree$tip.label)
+# Sequsermos ver as espécies que não coincidem
+setdiff(dimnames(land.dt)[[3]], tree$tip.label)
+
+# Atualizaremos o objeto tree para manter apenas as espécies desejadas na filogenia 
+tree <- drop.tip(tree, setdiff(tree$tip.label, 
+                         dimnames(land.dt)[[3]]))
+```
+Basicamente, estamos selecionando as espécies que não coincidem entre a filogenia e o `.tps` com `setdiff()` e removendo-as com `drop.tip()`. Você pode rodar `plotTree(tree)` para ver a árvore antes e depois desse processo (a diferença é bastante perceptível). Feito isso, ambos os objetos terão conteúdos referentes às mesmas espécies. No entanto, estão em ordens diferentes. No `R`, isso é um problema para quaisquer análises que envolvam o uso de filogenias. E como não podemos alterar a ordem das espécies na filogenia, vamos reordenar o nosso `.tps` para que esteja adequado:
+```{r reordem}
+# Ordenar o conjunto de dados para que coincida com a ordem das espécies na filogenia
+land.dt <- land.dt[,,match(tree$tip.label, 
+                           dimnames(land.dt)[[3]])]
+```
+Ótimo! Imagino que a essas alturas você já saiba como consultar a nova ordem das espécies no `.tps` (usando `dimnames(land.dt)[[3]]`). Por fim, podemos rodar a análise de Procrustes e gerar o morfoespaço.
+```{r procrustes}
+# Defina os sliders para cada curva
+c1 <- define.sliders(12:42)
+c2 <- define.sliders(41:52)
+c3 <- define.sliders(51:82)
+c4 <- define.sliders(81:101)
+
+# Análise de Procrustes
+gpa <- gpagen(land.dt, curves = rbind(c1, c2, c3, c4), 
+              ProcD = FALSE)
+
+# PCA para gerar o morfoespaço
+pca <- gm.prcomp(gpa$coords)
+```
+Perfeito. Agora podemos gerar, por fim, um filomorfoespaço:
+```{r filomorfoespaco1}
+filomsp<-phylomorphospace(tree, X = pca$x[,1:2],
+                 bty="n",node.size=c(0,1.2), label = "horizontal")
+```
+<p align="center">
+<img src="filomorfspc1.png" alt="Fig1">
+</p>
