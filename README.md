@@ -16,7 +16,7 @@ Curvas e contornos: semilandmarks e análise de Fourier
 [Aula 6](Aulas/tridimensional.md)  
 Aplicações da morfometria geométrica em 3D: semilandmarks de superfície e retrodeformação  
 
-[Aulas 7 e 8](Aulas/)  
+[Aulas 7 e 8](Aulas/filog.md)  
 Filogenia: forma média, disparidade morfológica e como a forma evolui ao longo do tempo e espaço  
 
 [Aula 9](Aulas/)  
