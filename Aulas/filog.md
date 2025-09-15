@@ -130,7 +130,7 @@ conv.Seca<-convSig(phy = tree,
                    traits = as.matrix(pca$x[,1]), 
         focaltaxa = names(eco)[eco == "Seca"])
 ```
-Os resultados podem ser acessados através dos objetos `conv.Mata` e `conv.Seca`, e neles é possível observar o valor para cada um dos índices de Stayton (C1, C2, C3 e C4) e um `p-valor`. Cada um dos índices de Stayton quantifica um aspecto diferente da convergência evolutiva. Os índices de Stayton avaliam a redução da distância entre táxons ao longo do tempo, indicando a proporção dessa redução (C1), a magnitude absoluta da convergência morfológica (C2) e uma normalização desse valor em relação ao total de mudança evolutiva ao longo das duas linhagens (C3) ou em toda a filogenia (C4). Em outras palavras, os índices C1 e C2 se valem apenas de interpretações com base na distância de Procrustes para quantificar a convergência, enquanto C3 e C4 levam em consideração o tempo e os comprimentos de ramo. No nosso caso também não há muita convergência evolutiva, com uma redução absoluta (C1) de de aproximadamente 22% entre espécies de área florestada e 26% entre espécies de áreas secas, sendo que estes valores não diferem do esperado ao acaso. Também podemos testar se a morfologia em cada ambiente tende a ser diferente. Vamos fazer isso junto a um teste alométrico:
+Os resultados podem ser acessados através dos objetos `conv.Mata` e `conv.Seca`, e neles é possível observar o valor para cada um dos índices de Stayton (C1, C2, C3 e C4) e um `p-valor`. Cada um dos índices de Stayton quantifica um aspecto diferente da convergência evolutiva. Os índices de Stayton avaliam a redução da distância entre táxons ao longo do tempo, indicando a proporção dessa redução (C1), a magnitude absoluta da convergência morfológica (C2) e uma normalização desse valor em relação ao total de mudança evolutiva ao longo das duas linhagens (C3) ou em toda a filogenia (C4). Em outras palavras, os índices C1 e C2 se valem apenas de interpretações com base na distância de Procrustes para quantificar a convergência, enquanto C3 e C4 levam em consideração o tempo e os comprimentos de ramo. No nosso caso também não há muita convergência evolutiva, com uma redução absoluta (C1) de de aproximadamente 22% entre espécies de área florestada (`C1 = 0.2203`) e 26% entre espécies de áreas secas (`C1 = 0.2585`), sendo que estes valores não diferem do esperado ao acaso. Também podemos testar se a morfologia em cada ambiente tende a ser diferente. Vamos fazer isso junto a um teste alométrico:
 ```{r pgls}
 # Rodando um PGLS
 m1<-procD.pgls(phy=tree, coords ~ log(Csize)*eco, 
@@ -140,6 +140,38 @@ summary(m1)
 Aqui, o que realizamos foi um PGLS (Phylogenetic Generalized Least Squares), uma regressão que “corrige” os dados para a história evolutiva compartilhada entre espécies, permitindo testar associações entre traços sem inflar falsos positivos devido à não-independência filogenética. E assim como nos casos anteriores, não constatamos efeitos atuantes sobre a forma.
 
 ## 3. Forma média
+Já sabemos que nesse conjunto de dados a forma não diverge tanto entre espécies de ambiente seco e florestado. Mas poderia divergir. E nessas circunstâncias uma abordagem que seria interessante seria identificar essas formas visualmente, de modo a comparar em quais aspectos elas diferem entre si. Para enxergar visualmente essa divergência, podemos calcular a *forma média* dos indivíduos. Aqui podemos usar o conceito de média aritmética como referência: uma medida de tendência central, representando o centro de um conjunto de dados. A forma média (ou *forma consenso*) segue a mesma ideia, e pode ser acessada através da função `mshape()`. A situação **mais comum** em que podemos precisar da forma média é quando temos múltiplos `.tps` (ou seja, `n` indivíduos) para a mesma espécie e desejamos fazer uma comparação *entre espécies* usando a filogenia. Essa comparação precisa ser feita descrevendo apenas uma forma por espécie. Então quando temos **múltiplas formas** é necessário calcular sua ***forma média*** para assegurar que o número de indivíduos seja o mesmo número de espécies na filogenia. Aqui será um pouco mais simples, bastando filtrar através da terceira dimensão do vetor `gpa$coords` os números dos espécimes em que `eco == "Mata"` e aqueles nos quais `eco == "Seca"`, para gerar dois novos objetos.
+```{r mshape}
+# Forma média
+mean_shape_mata <- mshape(gpa$coords[ , , eco == "Mata"])
+#plot(mean_shape_mata)
+mean_shape_seca <- mshape(gpa$coords[ , , eco == "Seca"])
+#plot(mean_shape_seca)
+
+# Para visualizar as formas médias, vamos respeitar o padrão de coloração usado anteriormente. Para controlar as cores e os tamanhos dos pontos, usaremos
+# a função gridPar()
+par(mfrow = c(2,2))  #Para gerar um único plot
+gp <- gridPar(grid.lwd = 0.25,
+              grid.col = "lightgray",
+              tar.pt.size = 1.1,
+              tar.pt.bg=rep("gold",32)) #Usado para definir a cor das espécies de área florestada
+plotRefToTarget(M1 = mean_shape_mata,
+                M2 = pca$shapes$shapes.comp1$min, gridPars=gp) #Como é a forma no mínimo do PC1
+plotRefToTarget(M1 = mean_shape_mata,
+                M2 = pca$shapes$shapes.comp1$max, gridPars=gp) #Como é a forma no máximo do PC1
+
+gp <- gridPar(grid.lwd = 0.25,
+              grid.col = "lightgray",
+              tar.pt.size = 1.1,
+              tar.pt.bg=rep("chocolate",32)) #Usado para definir a cor das espécies de área seca
+plotRefToTarget(M1 = mean_shape_seca,
+                M2 = pca$shapes$shapes.comp1$min, gridPars=gp) #Como é a forma no mínimo do PC1
+plotRefToTarget(M1 = mean_shape_seca,
+                M2 = pca$shapes$shapes.comp1$max, gridPars=gp) #Como é a forma no máximo do PC1
+``` 
+<p align="center">
+<img src="mshape.png" alt="Fig3">
+</p>
 
 
 ## 4. Diversificação da forma no tempo evolutivo
