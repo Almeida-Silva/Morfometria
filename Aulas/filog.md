@@ -139,7 +139,7 @@ summary(m1)
 ```
 Aqui, o que realizamos foi um PGLS (Phylogenetic Generalized Least Squares), uma regressão que “corrige” os dados para a história evolutiva compartilhada entre espécies, permitindo testar associações entre traços sem inflar falsos positivos devido à não-independência filogenética. E assim como nos casos anteriores, não constatamos efeitos atuantes sobre a forma.
 
-## 3. Forma média
+## 3. Forma média e disparidade morfológica
 Já sabemos que nesse conjunto de dados a forma não diverge tanto entre espécies de ambiente seco e florestado. Mas poderia divergir. E nessas circunstâncias uma abordagem que seria interessante seria identificar essas formas visualmente, de modo a comparar em quais aspectos elas diferem entre si. Para enxergar visualmente essa divergência, podemos calcular a *forma média* dos indivíduos. Aqui podemos usar o conceito de média aritmética como referência: uma medida de tendência central, representando o centro de um conjunto de dados. A forma média (ou *forma consenso*) segue a mesma ideia, e pode ser acessada através da função `mshape()`. A situação **mais comum** em que podemos precisar da forma média é quando temos múltiplos `.tps` (ou seja, `n` indivíduos) para a mesma espécie e desejamos fazer uma comparação *entre espécies* usando a filogenia. Essa comparação precisa ser feita descrevendo apenas uma forma por espécie. Então quando temos **múltiplas formas** é necessário calcular sua ***forma média*** para assegurar que o número de indivíduos seja o mesmo número de espécies na filogenia. Aqui será um pouco mais simples, bastando filtrar através da terceira dimensão do vetor `gpa$coords` os números dos espécimes em que `eco == "Mata"` e aqueles nos quais `eco == "Seca"`, para gerar dois novos objetos.
 ```{r mshape}
 # Forma média
@@ -173,6 +173,20 @@ plotRefToTarget(M1 = mean_shape_seca,
 <img src="mshape.png" alt="Fig3">
 </p>
 
+Do mesmo modo que existe uma *medida de tendência central* para a forma, faz sentido pensar em como a forma *varia* dentro da amostra. Ou seja, deve haver alguma medida de *variãncia* da forma. E ela de fato existe, se chama *variância de Procrustes*. Vamos pensar num exemplo. Se pensarmos em um dado grupo distribuído no morfoespaço (indivíduos que formam uma espécie, indivíduos amostrados numa mesma localidade, diferentes espécies que compõem um gênero ou família, etc.), a `forma média` dá a ideia de ponto equidistante entre os indivíduos que compõem aquele grupo. A `variância de Procrustes` é a média das distâncias entre as formas dos indivíduos de um dado grupo e sua `forma média`. Em outras palavras, a ideia aqui é medir o quanto a nuvem de pontos que compõe esse mesmo grupo está mais ou menos "espalhada". Se imaginarmos que o morfoespaço é formado por `n` componentes principais (i.e. `PC1`, `PC2`, `PC3`, `PC4`...), então é fácil perceber que diversas medidas diferentes podem ser usadas para quantificar esse "espalhamento". A *área* ocupada por um grupo pode ser uma medida útil, quando utilizamos um morfoespaço formado por duas dimensões (`PC1` x `PC2`). O *volume* pode ser uma medida útil quando utilizamos mais dimensões que isso. Em conjunto, essas (`variância de Procrustes`, `área/volume ocupado por um grupo no morfoespaço`) e outras abordagens (e.g. diferença máxima entre as formas de um grupo no morfoespaço, ou `amplitude de Procrustes`) são medidas da ***disparidade morfológica***. No `R`, temos a função `morphol.disparity()` para verificar a variância de Procrustes diretamente.
+```{r morphdisp1}
+# Disparidade morfológica simples
+m.disp<-morphol.disparity(gpa$coords ~ eco, 
+                          groups = eco, transform = F)
+summary(m.disp)
+```
+Veja que temos a definição *à priori* dos nossos grupos de interesse (o objeto `eco`), e através de uma fórmula indicamos o que esperamos: que a forma (acessada através do objeto `gpa$coords`) tenha variância distinta entre esses grupos. Aqui estamos usando uma fórmula simples, mas podemos aplicar um `PGLS` caso seja necessário corrigir a dependência filogenética entre os dados:
+```{r morphdisp2}
+# Disparidade morfológica com correção pelas relações de parentesco
+m.disp.phy<-morphol.disparity(procD.pgls(gpa$coords ~ eco, phy = tree)
+                          groups = eco, transform = F)
+summary(m.disp.phy)
+```
 
 ## 4. Diversificação da forma no tempo evolutivo
 
