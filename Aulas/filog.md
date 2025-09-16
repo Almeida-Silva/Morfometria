@@ -187,8 +187,28 @@ m.disp.phy<-morphol.disparity(procD.pgls(gpa$coords ~ eco, phy = tree)
                           groups = eco, transform = F)
 summary(m.disp.phy)
 ```
+Em ambos os casos, a saída da função não só gera o valor da variância para cada um dos grupos, como também testa a diferença entre essas variâncias (conferindo um `p-valor` à análise).
 
 ## 4. Diversificação da forma no tempo evolutivo
+Veja que, no fim das contas, a `forma média` e a `disparidade morfológica` são maneiras complementares de acessar a ocupação do morfoespaço, permitindo sua análise direta e quantitativa. Por outro lado, tínhamos tratado anteriormente o conceito de `filomorfoespaço`, em que a filogenia é usada para demonstrar relações entre as formas estudadas. Portanto, a *posição* que uma forma ocupa no morfoespaço pode ter significado biologicamente interpretável. E isso também é válido para formas *que são atualmente desconhecidas*. Os ramos da filogenia no filomorfoespaço, por exemplo, cruzam uma série de posições que podem ter sido ocupadas por formas extintas. Como já sabemos pela sistemática filogenética, filogenias são hipóteses, não uma realiadde absoluta. O mesmo vale aqui: é possível estabelecer hipóteses de evolução fenotípica examinando o morfoespaço. 
+A primeira abordagem que usaremos nesse sentido é a reconstrução da forma ao longo da filogenia. Para isso, vamos reconstruir o valor do `PC1` (disponível em `pca$x[,1]`), já que é o melhor descritor da forma na nossa amostra, além de ser uma variável contínua. O primeiro passo é encontrar qual seria o valor esperado para os ancestras no `PC1`, o que é feito com a função `fastAnc()`. Aqui, a reconstrução será feita considerando um modelo de movimento browniano, para assumir o mínimo de pressupostos possível. Outros modelos podem ser adotados com funções específicas, e testes podem ser feitos para verificar qual modelo melhor se ajusta aos seus dados, mas isso merece uma página e prática próprias. 
+```{r fastAnc}
+PC1.rec<-c(pca$x[,1],fastAnc(tree,pca$x[,1]))
+PC1.rec
+```
+
+Ao rodar `PC1.res` você deve ter observado que temos agora um valor para cada terminal e um valor para cada nó na árvore. Como a forma está sendo tratada como variável contínua, podemos extrapolar os valores esperados ao longo dos ramos utilizando a função `contMap`:
+```{r contMap}
+# Mapeando a evolução da forma ao longo dos ramos
+PC1.map <- contMap(tree, pca$x[,1], plot = FALSE)
+
+# Visualizando o resultado da reconstrução
+plot(PC1.map, legend = 0.7*max(nodeHeights(tree)), fsize = 0.7)
+
+```
+<p align="center">
+<img src="reconst.png" alt="Fig4">
+</p>
 
 
 ## 5. Inspecionando a forma nos 3 primeiros PCs
