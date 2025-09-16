@@ -198,8 +198,8 @@ PC1.rec
 ```
 
 Ao rodar `PC1.res` você deve ter observado que temos agora um valor para cada terminal e um valor para cada nó na árvore. Como a forma está sendo tratada como variável contínua, podemos extrapolar os valores esperados ao longo dos ramos utilizando a função `contMap`:
-```{r contMap}
-# Mapeando a evolução da forma ao longo dos ramos
+```{r contMapPC1}
+# Mapeando a evolução da forma ao longo dos ramos: PC1
 PC1.map <- contMap(tree, pca$x[,1], plot = FALSE)
 
 # Visualizando o resultado da reconstrução
@@ -209,6 +209,23 @@ plot(PC1.map, legend = 0.7*max(nodeHeights(tree)), fsize = 0.7)
 <p align="center">
 <img src="reconst.png" alt="Fig4">
 </p>
+
+Perfeito Agora se você comparar a variação ao longo da filogenia mapeada vai perceber que estamos falando da mesma escala de valores no `PC1` no filomorfoespaço, de modo que pode interpretar como seria a forma esperada para cada nó. Também pode encontrar alguns padrões, como uma mudança importante na forma a partir do ancestral de ((*R. inopina*, *R. ornata*), *R. cerradensis*). De modo complementar, ao olhar as grades de distorção podemos inferir que essa mudança foi representada por uma tendência ao alongamento antero-posterior da glândula paratóide nessas espécies, acompanhada de lateralização da crista loreal e posicionamento mais anterior dos olhos. Obviamente, tudo isso também pode ser visualizado através do plot da grade de distorção do ancestral do grupo em relação à forma média. Para isso, temos que reconstruir o valor do `PC2`
+```{r contMapPC2}
+# Mapeando a evolução da forma ao longo dos ramos: PC2
+PC2.rec <- c(pca$x[,2], fastAnc(tree, pca$x[,2]))
+PC2.map <- contMap(tree, pca$x[,2], plot = FALSE)
+
+# Encontrando o valor no PC1 e PC2 para o ancestral desejado
+anc_PC1 <- PC1.rec[getMRCA(tree, c("Rhinella_inopina", 
+                                   "Rhinella_ornata", 
+                                   "Rhinella_cerradensis"))]
+
+anc_PC2 <- PC2.rec[getMRCA(tree, c("Rhinella_inopina", 
+                                   "Rhinella_ornata", 
+                                   "Rhinella_cerradensis"))]
+```
+Os valores que estão "guardados" em `anc_PC1` e `anc_PC2` *são os mesmos* que a função `phylomorphospace()` gerou para o objeto `filomsp`, referenciando a posição do nó nº 16 (ou seja, o ancestral que estamos buscando; você pode confirmar isso rodando `filomsp$xx[16]` e `filomsp$yy[16]`). Isso mostra que todo o processo de elaboração do filomorfoespaço é matemático, utilizando a topologia da árvore e seus comprimentos de ramos na realização das estimativas. É por esse motivo que utilizar uma árvore datada é o correto nesse tipo de análise.
 
 
 ## 5. Inspecionando a forma nos 3 primeiros PCs
