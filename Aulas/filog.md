@@ -20,6 +20,7 @@ library(tidyverse)
 library(phytools)
 library(convevol)
 library(phylocurve)
+library(geiger)
 
 # Carregar os dados
 land.dt<-readland.tps("Rhinella.TPS", specID = "imageID", readcurves = TRUE)
@@ -225,11 +226,75 @@ anc_PC2 <- PC2.rec[getMRCA(tree, c("Rhinella_inopina",
                                    "Rhinella_ornata", 
                                    "Rhinella_cerradensis"))]
 ```
-Os valores que estão "guardados" em `anc_PC1` e `anc_PC2` *são os mesmos* que a função `phylomorphospace()` gerou para o objeto `filomsp`, referenciando a posição do nó nº 16 (ou seja, o ancestral que estamos buscando; você pode confirmar isso rodando `filomsp$xx[16]` e `filomsp$yy[16]`). Isso mostra que todo o processo de elaboração do filomorfoespaço é matemático, utilizando a topologia da árvore e seus comprimentos de ramos na realização das estimativas. É por esse motivo que utilizar uma árvore datada é o correto nesse tipo de análise. E se a datação é levada em conta durante o processo de reconstrução/elaboração do filomorfoespaço, então também é possível discutir como a forma evoluiu ao longo do tempo no grupo. Podemos visualizar como a forma variou ao longo do tempo através de um *fenograma*, por exemplo:
+Os valores que estão "guardados" em `anc_PC1` e `anc_PC2` *são os mesmos* que a função `phylomorphospace()` gerou para o objeto `filomsp`, referenciando a posição do nó nº 16 (ou seja, o ancestral que estamos buscando; você pode confirmar isso rodando `filomsp$xx[16]` e `filomsp$yy[16]`). Isso mostra que todo o processo de elaboração do filomorfoespaço é matemático, utilizando a topologia da árvore e seus comprimentos de ramos na realização das estimativas. É por esse motivo que utilizar uma árvore datada é o correto nesse tipo de análise. E se a datação é levada em conta durante o processo de reconstrução/elaboração do filomorfoespaço, então também é possível discutir como a forma evoluiu ao longo do tempo no grupo. Podemos visualizar como a forma variou ao longo do tempo através de um *fenograma*, por exemplo. Trata-se de uma representação da mudança da posição no morfoespaço (em função do `PC1`) durante o tempo geológico atravessado pela topologia. De modo similar, é possível verificar como a dispardidade morfológica variou ao longo do tempo (`DTT`, ou *disparity through time*):
 ```{r fenograma}
-phenogram(tree, pca$x[,1], fsize = 0.5,
-          spread.labels=TRUE,
-          flip.right = TRUE) 
+# Gerando um plot para tratar da mudança da forma ao longo do tempo
+layout(matrix(c(1,2,
+                1,3), nrow = 2, byrow = TRUE),
+       widths = c(1,1), heights = c(1,1)) # criando o layout para um plot com todos os gráficos 
+par(mar = c(4,4,2,1))  # definiindo as margens gerais
+
+# Plotando o fenograma em todo o lado esquerdo da figura
+phenogram(tree, pca$x[,1],
+          fsize = 1.0,
+          spread.labels = TRUE,
+          flip.right = TRUE)
+mtext("Fenograma", side = 3, line = 0.5, cex = 1, font = 1)
+
+# DTT (Mata): plot superior do lado direito
+dtt(tree, data = pca$x[eco == "Mata", ],
+    nsim = 9999, CI = 0.95, index = "avg.sq")
+mtext("Disparidade ao longo do tempo: Mata", side = 3, line = 0.5, cex = 1, font = 1)
+
+# DTT (Seca): plot inferior do lado direito
+dtt(tree, data = pca$x[eco == "Seca", ],
+    nsim = 9999, CI = 0.95, index = "avg.sq")
+mtext("Disparidade ao longo do tempo: Seca", side = 3, line = 0.5, cex = 1, font = 1)
 ```
+<p align="center">
+<img src="disparidade.png" alt="Fig5">
+</p>
+
+Conforme indica o fenograma, há uma expansão na ocupação do morfoespaço em *Rhinella* nos últimos 10 milhões de anos (como é possível observar em seus dois clados). Já a `DTT` sugere que as espécies de ambiente seco vem reduzindo sua diversidade de formas há mais tempo que as espécies de ambiente florestado. Isso permite levantar algumas hipóteses. A maior variedade de nichos em ambientes de floresta pode ter um papel importante na manutenção de diversidade morfológica no gênero, por exemplo. 
+Bom, então a variabilidade morfológica pode oscilar ao longo do tempo ao longo da filogenia; e, complementarmente, a mudança morfológica associada a essa variabilidade pode ocorrer de modo mais ou menos rápido de acordo com questões associadas (hábitat, microambiente, dieta, etc). Se a *velocidade* com que essa mudança ocorre não necessariamente é constante e igual entre grupos, então podem haver divergências em suas *taxas*: elas podem ser *mais ou menos aceleradas*. Essa é a definição das chamadas *taxas evolutivas de mudança morfológica*, que analisamos através da função `compare.evol.rates()`. Basicamente, o que a função faz é estimar e comparar as taxas de evolução multivariada (*`σ² multivariado`*) das formas ao longo da filogenia, baseadas no modelo browniano de evolução. Pode parecer complexo, mas se resume a isso:
+```{r evolrates}
+# Testando a diferença entre as taxas evolutivas dos grupos Seca e Mata
+compare.evol.rates(A = gpa$coords, phy = tree, gp = eco,
+                       iter = 9999, method = "permutation", 
+                       print.progress = T)
+```
+No nosso caso específico, a diferença é bastante baixa (*σ²<sub>Seca</sub>* = 1.597×10<sup>-5</sup>; *σ²<sub>Mata</sub>* = 1.650×10<sup>-5</sup>).
 
 ## 5. Inspecionando a forma nos 3 primeiros PCs
+Bom, acho que com isso conseguimos nos aprofundar bastante nas interpretações sobre a ocupação do morfoespaço e suas considerações evolutivas. Já que falamos sobre como disparidade morfológica é um reflexo dessa ocupação por um grupo, acho válido aproveitar para apresentar como podemos visualizar essa ocupação em 3 dimensões. O pacote `geometry` pode nos ajudar com isso. Imagine uma situação em que queremos plotar os 3 primeiros eixos da PCA, por exemplo. O que faremos é filtrar os dados entre nossos grupos de interesse, calcular o polígono convexo que agrupa todos os pontos desse grupo (como uma espécie de envoltório), e usar as funções específicas do pacote `geometry` para plotar conjuntamente os objetos 3D. Ficaria assim:
+```{r morfoespaco3d}
+# Filtrando os dados
+coords_seca <- pca$x[eco == "Seca", 1:3]
+coords_mata <- pca$x[eco == "Mata", 1:3]
+
+# Calculando o envoltório, ou convex hull
+hull_seca <- convhulln(coords_seca)
+hull_mata <- convhulln(coords_mata)
+
+# Configurando a janela de visualização 3D
+open3d()
+plot3d(coords_seca, col = "chocolate", 
+       size = 20, xlab = "X", ylab = "Y", zlab = "Z")
+# Usando os índices de vértices para desenhar as faces (triângulos) com rgl
+for (i in 1:nrow(hull_seca)) {
+  verts <- coords_seca[hull_seca[i, ], , drop = FALSE]  # seleciona os vértices
+  triangles3d(verts[,1], verts[,2], verts[,3], color = "coral", alpha = 0.8)
+}
+
+points3d(coords_mata, col = "gold", size = 20)
+# Usando os índices de vértices para desenhar as faces (triângulos) com rgl
+for (i in 1:nrow(hull_mata)) {
+  verts <- coords_mata[hull_mata[i, ], , drop = FALSE]  # seleciona os vértices
+  triangles3d(verts[,1], verts[,2], verts[,3], color = "yellow", alpha = 0.8)
+}
+```
+<p align="center">
+<img src="morfoespaco3d.png" alt="Fig6">
+</p>
+
+Se usarmos o argumento `options = "FA"` na função `convhulln()`, vamos obter também o volume e a superfície destes polígonos convexos, uma medida direta da disparidade morfológica. Curiosamente, quando fazemos isso o plot não é gerado com o script acima.
